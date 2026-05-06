@@ -1,0 +1,2871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xanedan — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Kufi+Arabic:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --s1: #1a1a1a;
+  --s2: #222;
+  --s3: #2a2a2a;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --gold: #c9a84c;
+  --gold2: #e8c97a;
+  --red: #e74c3c;
+  --green: #27ae60;
+  --blue: #3498db;
+  --w: #f0f0f0;
+  --m: rgba(240,240,240,0.5);
+  --m2: rgba(240,240,240,0.3);
+  --font: 'Inter', sans-serif;
+  --fku: 'Noto Kufi Arabic', sans-serif;
+  --radius: 10px;
+  --sidebar: 260px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--w); font-family:var(--font); min-height:100vh; }
+
+/* ── LOGIN ── */
+#login-screen {
+  position:fixed; inset:0; z-index:9999;
+  background:#0a0a0a;
+  display:flex; align-items:center; justify-content:center;
+}
+.login-box {
+  background:var(--s1);
+  border:1px solid var(--border2);
+  border-radius:16px;
+  padding:48px 40px;
+  width:min(420px, 95vw);
+  text-align:center;
+}
+.login-logo {
+  font-size:13px; letter-spacing:.4em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:4px;
+}
+.login-title {
+  font-size:22px; font-weight:600; color:var(--w);
+  margin-bottom:32px;
+}
+.login-field {
+  display:flex; flex-direction:column; gap:6px;
+  text-align:left; margin-bottom:16px;
+}
+.login-field label {
+  font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--m); font-weight:500;
+}
+.login-field input {
+  background:var(--s2); border:1px solid var(--border2);
+  color:var(--w); padding:12px 14px; border-radius:8px;
+  font-family:var(--font); font-size:14px; outline:none;
+  transition:border-color .2s;
+}
+.login-field input:focus { border-color:var(--gold); }
+.login-btn {
+  width:100%; background:var(--gold); color:#000;
+  border:none; padding:13px; border-radius:8px;
+  font-family:var(--font); font-size:14px; font-weight:600;
+  cursor:pointer; margin-top:8px; transition:background .2s;
+}
+.login-btn:hover { background:var(--gold2); }
+.login-error {
+  color:var(--red); font-size:13px; margin-top:12px;
+  display:none;
+}
+
+/* ── LAYOUT ── */
+#app { display:none; min-height:100vh; }
+#app.on { display:block; min-height:100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--s1);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 50;
+}
+.sb-logo {
+  padding:24px 20px 20px;
+  border-bottom:1px solid var(--border);
+}
+.sb-logo-name {
+  font-size:13px; letter-spacing:.35em;
+  text-transform:uppercase; color:var(--gold);
+  font-weight:600;
+}
+.sb-logo-sub {
+  font-size:11px; color:var(--m);
+  margin-top:3px; letter-spacing:.1em;
+}
+.sb-nav { padding:12px 0; flex:1; }
+.sb-section {
+  font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--m2); padding:16px 20px 6px; font-weight:600;
+}
+.sb-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 20px; cursor:pointer;
+  color:var(--m); font-size:13px; font-weight:500;
+  transition:all .2s; border-left:2px solid transparent;
+}
+.sb-item:hover { color:var(--w); background:var(--s2); }
+.sb-item.active { color:var(--gold); border-left-color:var(--gold); background:rgba(201,168,76,.06); }
+.sb-icon { font-size:16px; width:20px; text-align:center; }
+.sb-footer {
+  padding:16px 20px;
+  border-top:1px solid var(--border);
+}
+.sb-user { font-size:12px; color:var(--m); margin-bottom:8px; }
+.sb-logout {
+  background:none; border:1px solid var(--border2);
+  color:var(--m); padding:7px 14px; border-radius:6px;
+  cursor:pointer; font-size:12px; transition:all .2s; width:100%;
+}
+.sb-logout:hover { border-color:var(--red); color:var(--red); }
+
+/* ── MAIN ── */
+.main {
+  margin-left: 260px;
+  flex: 1;
+  padding: 32px 32px 32px 32px;
+  max-width: calc(100vw - 260px);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ── PAGE ── */
+.page {
+  display: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+.page.active {
+  display: block;
+  width: 100%;
+  animation: fadeUp .35s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+.page-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:28px;
+}
+.page-title { font-size:22px; font-weight:700; color:var(--w); }
+.page-sub { font-size:13px; color:var(--m); margin-top:3px; }
+
+/* ── CARDS ── */
+.stat-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:16px; margin-bottom:32px;
+}
+.stat-card {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:var(--radius); padding:20px;
+}
+.stat-num { font-size:32px; font-weight:700; color:var(--gold); }
+.stat-label { font-size:12px; color:var(--m); margin-top:4px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:9px 18px; border-radius:7px; border:none;
+  font-family:var(--font); font-size:13px; font-weight:500;
+  cursor:pointer; transition:all .2s; white-space:nowrap;
+}
+.btn-gold { background:var(--gold); color:#000; }
+.btn-gold:hover { background:var(--gold2); }
+.btn-outline { background:none; border:1px solid var(--border2); color:var(--m); }
+.btn-outline:hover { border-color:var(--w); color:var(--w); }
+.btn-red { background:rgba(231,76,60,.12); color:var(--red); border:1px solid rgba(231,76,60,.2); }
+.btn-red:hover { background:rgba(231,76,60,.2); }
+.btn-green { background:rgba(39,174,96,.12); color:var(--green); border:1px solid rgba(39,174,96,.2); }
+.btn-green:hover { background:rgba(39,174,96,.2); }
+.btn-sm { padding:6px 12px; font-size:12px; }
+
+/* ── TABLE ── */
+.table-wrap {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden;
+}
+.table-toolbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 20px; border-bottom:1px solid var(--border);
+  gap:12px; flex-wrap:wrap;
+}
+.search-box {
+  display:flex; align-items:center; gap:8px;
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:7px; padding:8px 12px; flex:1; max-width:300px;
+}
+.search-box input {
+  background:none; border:none; outline:none;
+  color:var(--w); font-size:13px; font-family:var(--font); width:100%;
+}
+.search-box input::placeholder { color:var(--m2); }
+
+table { width:100%; border-collapse:collapse; }
+th {
+  text-align:left; padding:12px 16px;
+  font-size:11px; font-weight:600; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--m);
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+td {
+  padding:13px 16px; font-size:13px; color:var(--w);
+  border-bottom:1px solid var(--border); vertical-align:middle;
+}
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:var(--s2); }
+.td-img {
+  width:52px; height:38px; border-radius:6px;
+  object-fit:cover; display:block;
+}
+.td-img-empty {
+  width:52px; height:38px; border-radius:6px;
+  background:var(--s3); display:flex; align-items:center;
+  justify-content:center; font-size:16px; opacity:.4;
+}
+.td-lang { display:flex; flex-direction:column; gap:2px; }
+.td-lang-en { font-size:13px; color:var(--w); font-weight:500; }
+.td-lang-ku { font-family:var(--fku); font-size:12px; color:var(--gold); direction:rtl; }
+.td-lang-ar { font-family:var(--fku); font-size:11px; color:var(--m); direction:rtl; }
+.badge {
+  display:inline-block; padding:3px 9px; border-radius:20px;
+  font-size:11px; font-weight:500;
+}
+.badge-cat { background:rgba(201,168,76,.12); color:var(--gold); }
+.td-actions { display:flex; gap:6px; }
+
+/* ── MODAL ── */
+.modal-bg {
+  display:none; position:fixed; inset:0; z-index:500;
+  background:rgba(0,0,0,.75); backdrop-filter:blur(6px);
+  align-items:flex-start; justify-content:center;
+  overflow-y:auto; padding:32px 16px;
+}
+.modal-bg.open { display:flex; animation:fadeIn .25s ease; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.modal {
+  background:var(--s1); border:1px solid var(--border2);
+  border-radius:14px; padding:32px;
+  width:min(680px, 100%); position:relative;
+  margin:auto;
+}
+.modal h2 {
+  font-size:18px; font-weight:700; color:var(--w);
+  margin-bottom:24px; padding-bottom:16px;
+  border-bottom:1px solid var(--border);
+}
+.modal-x {
+  position:absolute; top:16px; right:18px;
+  background:none; border:none; color:var(--m);
+  font-size:22px; cursor:pointer; line-height:1;
+  transition:color .2s;
+}
+.modal-x:hover { color:var(--w); }
+.modal-footer {
+  display:flex; gap:10px; justify-content:flex-end;
+  margin-top:24px; padding-top:16px;
+  border-top:1px solid var(--border);
+}
+
+/* ── FORM ── */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.form-grid.col3 { grid-template-columns:1fr 1fr 1fr; }
+.form-full { grid-column:1/-1; }
+.fg {
+  display:flex; flex-direction:column; gap:6px;
+}
+.fg label {
+  font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--m); font-weight:500;
+}
+.fg input, .fg select, .fg textarea {
+  background:var(--s2); border:1px solid var(--border2);
+  color:var(--w); padding:10px 13px; border-radius:8px;
+  font-family:var(--font); font-size:13px; outline:none;
+  transition:border-color .2s; width:100%;
+}
+.fg input:focus, .fg select:focus, .fg textarea:focus {
+  border-color:var(--gold);
+}
+.fg select option { background:var(--s2); }
+.fg textarea { resize:vertical; min-height:72px; }
+.fg input[type="color"] {
+  height:42px; padding:4px 8px; cursor:pointer;
+}
+.fg-rtl input, .fg-rtl textarea {
+  direction:rtl; font-family:var(--fku);
+}
+
+.lang-tabs-header {
+  display:flex; gap:0; margin-bottom:16px;
+  border:1px solid var(--border2); border-radius:8px; overflow:hidden;
+}
+.lang-tab-btn {
+  flex:1; background:none; border:none; padding:9px;
+  color:var(--m); font-size:12px; font-weight:500;
+  cursor:pointer; transition:all .2s; letter-spacing:.05em;
+}
+.lang-tab-btn.active { background:var(--gold); color:#000; }
+
+/* ── COLORS PAGE ── */
+.color-section {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:var(--radius); padding:24px; margin-bottom:20px;
+}
+.color-section-title {
+  font-size:14px; font-weight:600; color:var(--w);
+  margin-bottom:18px; padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:8px;
+}
+.color-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:16px;
+}
+.color-item {
+  display:flex; flex-direction:column; gap:6px;
+}
+.color-item label {
+  font-size:11px; color:var(--m); text-transform:uppercase;
+  letter-spacing:.08em; font-weight:500;
+}
+.color-row {
+  display:flex; align-items:center; gap:10px;
+}
+.color-row input[type="color"] {
+  width:44px; height:36px; border:1px solid var(--border2);
+  border-radius:7px; cursor:pointer; background:var(--s2);
+  padding:3px;
+}
+.color-row input[type="text"] {
+  flex:1; background:var(--s2); border:1px solid var(--border2);
+  color:var(--w); padding:8px 11px; border-radius:7px;
+  font-family:'Courier New',monospace; font-size:12px;
+  outline:none;
+}
+.color-row input[type="text"]:focus { border-color:var(--gold); }
+
+/* ── PREVIEW CARD ── */
+.preview-wrap {
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:var(--radius); padding:20px; margin-top:20px;
+}
+.preview-label {
+  font-size:11px; color:var(--m); letter-spacing:.1em;
+  text-transform:uppercase; margin-bottom:14px; font-weight:500;
+}
+.preview-card {
+  display:flex; align-items:stretch;
+  border-radius:14px; overflow:hidden;
+  min-height:90px; box-shadow:0 2px 8px rgba(0,0,0,.15);
+  transition:all .3s;
+}
+.preview-img {
+  width:100px; flex-shrink:0;
+  background:#555; display:flex; align-items:center;
+  justify-content:center; font-size:28px;
+}
+.preview-body {
+  flex:1; padding:14px 18px;
+  display:flex; flex-direction:column; justify-content:center; gap:4px;
+}
+.preview-en { font-size:17px; font-weight:700; }
+.preview-ku { font-family:var(--fku); font-size:13px; direction:rtl; text-align:right; }
+.preview-ar { font-family:var(--fku); font-size:12px; direction:rtl; text-align:right; }
+.preview-desc { font-size:12px; font-style:italic; margin-top:4px; }
+.preview-price {
+  padding:0 18px; display:flex; align-items:flex-end;
+  padding-bottom:12px; font-size:14px; font-weight:600;
+}
+
+/* ── RADIUS SLIDER ── */
+.slider-row {
+  display:flex; align-items:center; gap:14px; margin-top:8px;
+}
+.slider-row input[type="range"] {
+  flex:1; accent-color:var(--gold);
+}
+.slider-val {
+  font-size:13px; color:var(--gold); font-weight:600;
+  min-width:40px;
+}
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:24px; right:24px; z-index:9999;
+  background:var(--s1); border:1px solid var(--border2);
+  border-radius:10px; padding:14px 20px;
+  display:flex; align-items:center; gap:10px;
+  font-size:13px; color:var(--w);
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  transform:translateY(80px); opacity:0;
+  transition:all .35s ease;
+  pointer-events:none;
+}
+.toast.show { transform:translateY(0); opacity:1; }
+.toast-icon { font-size:18px; }
+
+/* ── LOADING ── */
+.loading {
+  display:flex; align-items:center; justify-content:center;
+  padding:48px; color:var(--m); font-size:13px; gap:10px;
+}
+.spinner {
+  width:20px; height:20px; border:2px solid var(--border);
+  border-top-color:var(--gold); border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* ── EMPTY STATE ── */
+.empty {
+  text-align:center; padding:56px 24px; color:var(--m);
+}
+.empty-icon { font-size:48px; margin-bottom:12px; opacity:.4; }
+.empty-text { font-size:14px; }
+
+/* ── STATUS DOT ── */
+.dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px; }
+.dot-green { background:var(--green); }
+.dot-red { background:var(--red); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:#333; border-radius:2px; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px) {
+  .sidebar { transform:translateX(-100%); transition:transform .3s; }
+  .sidebar.open { transform:translateX(0); }
+  .main { margin-left:0; }
+  .form-grid { grid-template-columns:1fr; }
+  .form-grid.col3 { grid-template-columns:1fr; }
+}
+
+.tag { padding:2px 8px; border-radius:4px; font-size:11px; }
+.tag-active { background:rgba(39,174,96,.15); color:var(--green); }
+
+.divider { height:1px; background:var(--border); margin:20px 0; }
+
+.info-box {
+  background:rgba(52,152,219,.08); border:1px solid rgba(52,152,219,.2);
+  border-radius:8px; padding:14px 16px; font-size:13px;
+  color:rgba(52,152,219,.9); margin-bottom:20px;
+  display:flex; gap:10px; align-items:flex-start;
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Xanedan Cafe & Rest</div>
+    <div class="login-title">Admin Dashboard</div>
+    <div class="fg login-field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="admin@xanedan.com">
+    </div>
+    <div class="fg login-field">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="login-error">Invalid credentials. Please try again.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-name">Xanedan</div>
+      <div class="sb-logo-sub">Menu Admin Panel</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">Overview</div>
+      <div class="sb-item active" onclick="goPage('dashboard',this)">
+        <span class="sb-icon">📊</span> Dashboard
+      </div>
+
+      <div class="sb-section">Menu</div>
+      <div class="sb-item" onclick="goPage('items',this)">
+        <span class="sb-icon">🍽️</span> Menu Items
+      </div>
+      <div class="sb-item" onclick="goPage('categories',this)">
+        <span class="sb-icon">🗂️</span> Categories
+      </div>
+
+      <div class="sb-section">Images & Branding</div>
+      <div class="sb-item" onclick="goPage('branding',this)">
+        <span class="sb-icon">🖼️</span> Images & Branding
+      </div>
+
+      <div class="sb-section">Appearance</div>
+      <div class="sb-item" onclick="goPage('colors',this)">
+        <span class="sb-icon">🎨</span> Colors & Style
+      </div>
+      <div class="sb-item" onclick="goPage('typography',this)">
+        <span class="sb-icon">🔤</span> Text Settings
+      </div>
+      <div class="sb-item" onclick="goPage('layout',this)">
+        <span class="sb-icon">⚙️</span> Layout & Spacing
+      </div>
+      <div class="sb-item" onclick="goPage('cardbuilder',this)">
+        <span class="sb-icon">🃏</span> Card Layout Builder
+      </div>
+      <div class="sb-item" onclick="goPage('headerbuilder',this)">
+        <span class="sb-icon">🖼️</span> Category Header Builder
+      </div>
+
+      <div class="sb-section">Settings</div>
+      <div class="sb-item" onclick="goPage('settings',this)">
+        <span class="sb-icon">🔧</span> General Settings
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user" id="sb-user-email">admin@xanedan.com</div>
+      <button class="sb-logout" onclick="doLogout()">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub">Welcome back to Xanedan Admin</div>
+        </div>
+        <a href="xanedan_menu.html" target="_blank" class="btn btn-outline">
+          👁️ Preview Menu
+        </a>
+      </div>
+
+      <div class="stat-grid" id="stat-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-items">—</div>
+          <div class="stat-label">Total Menu Items</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-cats">—</div>
+          <div class="stat-label">Categories</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">3</div>
+          <div class="stat-label">Languages</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num"><span class="dot dot-green"></span>Live</div>
+          <div class="stat-label">Menu Status</div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        ℹ️ Changes made here are saved to Firebase and reflected on the menu instantly. Use the <strong>Preview Menu</strong> button to see your changes live.
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div style="font-size:14px;font-weight:600;">Recent Items</div>
+          <button class="btn btn-gold btn-sm" onclick="goPage('items',document.querySelector('[onclick*=items]'))">
+            + Add Item
+          </button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="recent-items-tbody">
+            <tr><td colspan="4"><div class="loading"><div class="spinner"></div> Loading...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ MENU ITEMS ══ -->
+    <div class="page" id="page-items">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Menu Items</div>
+          <div class="page-sub">Manage all your menu products</div>
+        </div>
+        <button class="btn btn-gold" onclick="openItemModal()">+ Add New Item</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="search-box">
+            🔍
+            <input type="text" placeholder="Search items..." id="item-search" oninput="filterItems()">
+          </div>
+          <select class="btn btn-outline" id="cat-filter" onchange="filterItems()" style="cursor:pointer;">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Photo</th>
+              <th>Name (3 Languages)</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="items-tbody">
+            <tr><td colspan="5"><div class="loading"><div class="spinner"></div> Loading...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ CATEGORIES ══ -->
+    <div class="page" id="page-categories">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Categories</div>
+          <div class="page-sub">Manage menu sections and their names in 3 languages</div>
+        </div>
+        <button class="btn btn-gold" onclick="openCatModal()">+ Add Category</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name (EN)</th>
+              <th>Name (Kurdish)</th>
+              <th>Name (Arabic)</th>
+              <th>Items</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="cats-tbody">
+            <tr><td colspan="6"><div class="loading"><div class="spinner"></div> Loading...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ COLORS & STYLE ══ -->
+    <div class="page" id="page-colors">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Colors & Style</div>
+          <div class="page-sub">Customize every color in the menu</div>
+        </div>
+        <button class="btn btn-gold" onclick="saveColors()">💾 Save Changes</button>
+      </div>
+
+      <!-- Live Preview -->
+      <div class="preview-wrap">
+        <div class="preview-label">Live Preview — Card</div>
+        <div class="preview-card" id="preview-card">
+          <div class="preview-img" id="preview-img" style="background:#c9a87d;">🍖</div>
+          <div class="preview-body" id="preview-body">
+            <div class="preview-en" id="preview-en">Quzi Zand</div>
+            <div class="preview-ku" id="preview-ku">قوزی زەند</div>
+            <div class="preview-ar" id="preview-ar">قوزي زند</div>
+            <div class="preview-desc" id="preview-desc">Slow-cooked lamb on fragrant rice</div>
+          </div>
+          <div class="preview-price" id="preview-price">15,000 IQD</div>
+        </div>
+      </div>
+
+      <!-- Card Colors -->
+      <div class="color-section">
+        <div class="color-section-title">🃏 Product Card</div>
+        <div class="color-grid">
+          <div class="color-item">
+            <label>Card Background</label>
+            <div class="color-row">
+              <input type="color" id="c-card-bg" value="#debf97" oninput="syncColor('c-card-bg','ct-card-bg');livePreview()">
+              <input type="text" id="ct-card-bg" value="#debf97" oninput="syncText('ct-card-bg','c-card-bg');livePreview()">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Card Hover Background</label>
+            <div class="color-row">
+              <input type="color" id="c-card-hover" value="#d4b48a" oninput="syncColor('c-card-hover','ct-card-hover')">
+              <input type="text" id="ct-card-hover" value="#d4b48a" oninput="syncText('ct-card-hover','c-card-hover')">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Card Border</label>
+            <div class="color-row">
+              <input type="color" id="c-card-border" value="#d0b07a" oninput="syncColor('c-card-border','ct-card-border');livePreview()">
+              <input type="text" id="ct-card-border" value="#d0b07a" oninput="syncText('ct-card-border','c-card-border');livePreview()">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Card Shadow</label>
+            <div class="color-row">
+              <input type="color" id="c-card-shadow" value="#00000014" oninput="syncColor('c-card-shadow','ct-card-shadow')">
+              <input type="text" id="ct-card-shadow" value="rgba(0,0,0,0.08)" oninput="syncText('ct-card-shadow','c-card-shadow')">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text Colors -->
+      <div class="color-section">
+        <div class="color-section-title">🔤 Text Colors</div>
+        <div class="color-grid">
+          <div class="color-item">
+            <label>English Name</label>
+            <div class="color-row">
+              <input type="color" id="c-en" value="#c8860a" oninput="syncColor('c-en','ct-en');livePreview()">
+              <input type="text" id="ct-en" value="#c8860a" oninput="syncText('ct-en','c-en');livePreview()">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Kurdish Name</label>
+            <div class="color-row">
+              <input type="color" id="c-ku" value="#ffffff" oninput="syncColor('c-ku','ct-ku');livePreview()">
+              <input type="text" id="ct-ku" value="#ffffff" oninput="syncText('ct-ku','c-ku');livePreview()">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Arabic Name</label>
+            <div class="color-row">
+              <input type="color" id="c-ar" value="#ffffff" oninput="syncColor('c-ar','ct-ar');livePreview()">
+              <input type="text" id="ct-ar" value="#ffffff" oninput="syncText('ct-ar','c-ar');livePreview()">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Description Text</label>
+            <div class="color-row">
+              <input type="color" id="c-desc" value="#ffffffbf" oninput="syncColor('c-desc','ct-desc');livePreview()">
+              <input type="text" id="ct-desc" value="rgba(255,255,255,0.75)" oninput="syncText('ct-desc','c-desc');livePreview()">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Price Color</label>
+            <div class="color-row">
+              <input type="color" id="c-price" value="#5c3d1e" oninput="syncColor('c-price','ct-price');livePreview()">
+              <input type="text" id="ct-price" value="#5c3d1e" oninput="syncText('ct-price','c-price');livePreview()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Global Colors -->
+      <div class="color-section">
+        <div class="color-section-title">🌐 Global / Page</div>
+        <div class="color-grid">
+          <div class="color-item">
+            <label>Page Background</label>
+            <div class="color-row">
+              <input type="color" id="c-bg" value="#0a0a0a" oninput="syncColor('c-bg','ct-bg')">
+              <input type="text" id="ct-bg" value="#0a0a0a" oninput="syncText('ct-bg','c-bg')">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Gold / Accent Color</label>
+            <div class="color-row">
+              <input type="color" id="c-gold" value="#c9a84c" oninput="syncColor('c-gold','ct-gold')">
+              <input type="text" id="ct-gold" value="#c9a84c" oninput="syncText('ct-gold','c-gold')">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Nav Bar Background</label>
+            <div class="color-row">
+              <input type="color" id="c-nav" value="#debf97" oninput="syncColor('c-nav','ct-nav')">
+              <input type="text" id="ct-nav" value="#debf97" oninput="syncText('ct-nav','c-nav')">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Nav Tab Text</label>
+            <div class="color-row">
+              <input type="color" id="c-nav-text" value="#1a0e04" oninput="syncColor('c-nav-text','ct-nav-text')">
+              <input type="text" id="ct-nav-text" value="#1a0e04" oninput="syncText('ct-nav-text','c-nav-text')">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+        <button class="btn btn-gold" onclick="saveColors()">💾 Save All Colors</button>
+      </div>
+    </div>
+
+    <!-- ══ TYPOGRAPHY ══ -->
+    <div class="page" id="page-typography">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Text Settings</div>
+          <div class="page-sub">Control font sizes and weights</div>
+        </div>
+        <button class="btn btn-gold" onclick="saveTypography()">💾 Save</button>
+      </div>
+
+      <div class="color-section">
+        <div class="color-section-title">📏 Font Sizes</div>
+        <div class="color-grid">
+          <div class="color-item">
+            <label>English Name Size</label>
+            <div class="slider-row">
+              <input type="range" min="12" max="28" value="17" id="fs-en" oninput="document.getElementById('fv-en').textContent=this.value+'px'">
+              <span class="slider-val" id="fv-en">17px</span>
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Kurdish Name Size</label>
+            <div class="slider-row">
+              <input type="range" min="10" max="24" value="13" id="fs-ku" oninput="document.getElementById('fv-ku').textContent=this.value+'px'">
+              <span class="slider-val" id="fv-ku">13px</span>
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Arabic Name Size</label>
+            <div class="slider-row">
+              <input type="range" min="10" max="22" value="12" id="fs-ar" oninput="document.getElementById('fv-ar').textContent=this.value+'px'">
+              <span class="slider-val" id="fv-ar">12px</span>
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Price Size</label>
+            <div class="slider-row">
+              <input type="range" min="11" max="22" value="14" id="fs-price" oninput="document.getElementById('fv-price').textContent=this.value+'px'">
+              <span class="slider-val" id="fv-price">14px</span>
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Description Size</label>
+            <div class="slider-row">
+              <input type="range" min="10" max="18" value="12" id="fs-desc" oninput="document.getElementById('fv-desc').textContent=this.value+'px'">
+              <span class="slider-val" id="fv-desc">12px</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LAYOUT ══ -->
+    <div class="page" id="page-layout">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Layout & Spacing</div>
+          <div class="page-sub">Card shape, size and spacing</div>
+        </div>
+        <button class="btn btn-gold" onclick="saveLayout()">💾 Save</button>
+      </div>
+
+      <div class="color-section">
+        <div class="color-section-title">📐 Card Shape</div>
+        <div class="color-grid">
+          <div class="color-item">
+            <label>Border Radius</label>
+            <div class="slider-row">
+              <input type="range" min="0" max="30" value="14" id="sl-radius" oninput="document.getElementById('sv-radius').textContent=this.value+'px';updatePreviewRadius()">
+              <span class="slider-val" id="sv-radius">14px</span>
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Card Image Width</label>
+            <div class="slider-row">
+              <input type="range" min="60" max="180" value="100" id="sl-imgw" oninput="document.getElementById('sv-imgw').textContent=this.value+'px'">
+              <span class="slider-val" id="sv-imgw">100px</span>
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Card Min Height</label>
+            <div class="slider-row">
+              <input type="range" min="60" max="160" value="96" id="sl-height" oninput="document.getElementById('sv-height').textContent=this.value+'px'">
+              <span class="slider-val" id="sv-height">96px</span>
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Gap Between Cards</label>
+            <div class="slider-row">
+              <input type="range" min="0" max="24" value="10" id="sl-gap" oninput="document.getElementById('sv-gap').textContent=this.value+'px'">
+              <span class="slider-val" id="sv-gap">10px</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="preview-wrap" style="margin-top:20px;">
+        <div class="preview-label">Preview</div>
+        <div class="preview-card" id="layout-preview" style="border-radius:14px;">
+          <div class="preview-img" style="width:100px;background:#c9a87d;">🍖</div>
+          <div class="preview-body">
+            <div style="font-size:17px;font-weight:700;color:#c8860a;">Quzi Zand</div>
+            <div style="font-family:'Noto Kufi Arabic',sans-serif;font-size:13px;color:#fff;">قوزی زەند</div>
+            <div style="font-family:'Noto Kufi Arabic',sans-serif;font-size:12px;color:rgba(255,255,255,0.7);">قوزي زند</div>
+          </div>
+          <div style="padding:0 18px;display:flex;align-items:flex-end;padding-bottom:12px;font-size:14px;font-weight:600;color:#5c3d1e;">15,000 IQD</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <div>
+          <div class="page-title">General Settings</div>
+          <div class="page-sub">Restaurant info and menu configuration</div>
+        </div>
+        <button class="btn btn-gold" onclick="saveSettings()">💾 Save</button>
+      </div>
+
+      <div class="color-section">
+        <div class="color-section-title">🏠 Restaurant Info</div>
+        <div class="info-box">ℹ️ To change the restaurant name, logo, and images — go to <strong>Images &amp; Branding</strong> in the sidebar. To change colors — go to <strong>Colors &amp; Style</strong>.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+          <button class="btn btn-outline" onclick="goPage('branding',document.querySelector('[onclick*=branding]'))">🖼️ Go to Images &amp; Branding</button>
+          <button class="btn btn-outline" onclick="goPage('colors',document.querySelector('[onclick*=colors]'))">🎨 Go to Colors &amp; Style</button>
+          <button class="btn btn-outline" onclick="goPage('cardbuilder',document.querySelector('[onclick*=cardbuilder]'))">🃏 Go to Card Builder</button>
+          <button class="btn btn-outline" onclick="goPage('headerbuilder',document.querySelector('[onclick*=headerbuilder]'))">🖼️ Go to Header Builder</button>
+        </div>
+      </div>
+      </div>
+
+  
+<div class="page" id="page-cardbuilder">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Card Layout Builder</div>
+      <div class="page-sub">Drag and position every element inside the product card</div>
+    </div>
+    <button class="btn btn-gold" onclick="saveCardLayout()">💾 Save Layout</button>
+  </div>
+
+  <div class="builder-wrap">
+    <!-- LIVE PREVIEW -->
+    <div class="builder-canvas-wrap">
+      <div class="builder-canvas-label">🔴 Live Preview — changes apply instantly</div>
+      <div id="cb-preview-card" style="display:flex;">
+        <div id="cb-card-image-left">🍖</div>
+        <div id="cb-card-body">
+          <div id="cb-card-name">Quzi Zand</div>
+          <div id="cb-card-ku">قوزی زەند</div>
+          <div id="cb-card-ar">قوزي زند</div>
+          <div id="cb-card-desc">Slow-cooked lamb on fragrant rice</div>
+          <div id="cb-card-price">15,000 IQD</div>
+        </div>
+      </div>
+      <div style="margin-top:20px;padding:14px;background:var(--s3);border-radius:8px;font-size:12px;color:var(--m);line-height:1.7;">
+        💡 <strong style="color:var(--w);">Tip:</strong> Use the controls on the right to position and style each element. Changes are shown live above. Click <strong style="color:var(--gold);">Save Layout</strong> to apply to all cards on the menu.
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="builder-controls">
+
+      <!-- IMAGE -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">📷 Image</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Position</span>
+          <select id="cb-img-pos" onchange="applyCardPreview()">
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+            <option value="top">Top</option>
+            <option value="none">Hidden</option>
+          </select>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Width</span>
+          <input type="range" min="60" max="200" value="100" id="cb-img-w" oninput="document.getElementById('cb-img-w-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-img-w-v">100px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Top Height (if top)</span>
+          <input type="range" min="80" max="260" value="140" id="cb-img-h" oninput="document.getElementById('cb-img-h-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-img-h-v">140px</span>
+        </div>
+      </div>
+
+      <!-- CARD BG -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">🎨 Card Background</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Color</span>
+          <input type="color" id="cb-bg" value="#debf97" oninput="document.getElementById('cb-bg-t').value=this.value;applyCardPreview()">
+          <input type="text" id="cb-bg-t" value="#debf97" oninput="if(this.value.match(/^#[0-9a-fA-F]{6}$/)){document.getElementById('cb-bg').value=this.value;applyCardPreview()}">
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Min Height</span>
+          <input type="range" min="60" max="200" value="96" id="cb-height" oninput="document.getElementById('cb-height-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-height-v">96px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Border Radius</span>
+          <input type="range" min="0" max="30" value="14" id="cb-radius" oninput="document.getElementById('cb-radius-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-radius-v">14px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Gap Between Cards</span>
+          <input type="range" min="0" max="32" value="10" id="cb-gap" oninput="document.getElementById('cb-gap-v').textContent=this.value+'px'">
+          <span class="ctrl-val" id="cb-gap-v">10px</span>
+        </div>
+      </div>
+
+      <!-- EN NAME -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">🇬🇧 English Name</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Color</span>
+          <input type="color" id="cb-en-c" value="#c8860a" oninput="document.getElementById('cb-en-ct').value=this.value;applyCardPreview()">
+          <input type="text" id="cb-en-ct" value="#c8860a" oninput="if(this.value.match(/^#[0-9a-fA-F]{6}$/)){document.getElementById('cb-en-c').value=this.value;applyCardPreview()}">
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Font Size</span>
+          <input type="range" min="12" max="30" value="17" id="cb-en-fs" oninput="document.getElementById('cb-en-fs-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-en-fs-v">17px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Alignment</span>
+          <select id="cb-en-align" onchange="applyCardPreview()">
+            <option value="left">Left</option>
+            <option value="center">Center</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Font Weight</span>
+          <select id="cb-en-fw" onchange="applyCardPreview()">
+            <option value="400">Regular</option>
+            <option value="600">Semi-Bold</option>
+            <option value="700" selected>Bold</option>
+          </select>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Letter Spacing</span>
+          <input type="range" min="0" max="10" step="0.5" value="0" id="cb-en-ls" oninput="document.getElementById('cb-en-ls-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-en-ls-v">0px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Show</span>
+          <input type="checkbox" id="cb-en-show" checked onchange="applyCardPreview()">
+        </div>
+      </div>
+
+      <!-- KURDISH NAME -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">🟡 Kurdish Name</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Color</span>
+          <input type="color" id="cb-ku-c" value="#ffffff" oninput="document.getElementById('cb-ku-ct').value=this.value;applyCardPreview()">
+          <input type="text" id="cb-ku-ct" value="#ffffff" oninput="if(this.value.match(/^#[0-9a-fA-F]{6}$/)){document.getElementById('cb-ku-c').value=this.value;applyCardPreview()}">
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Font Size</span>
+          <input type="range" min="10" max="24" value="13" id="cb-ku-fs" oninput="document.getElementById('cb-ku-fs-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-ku-fs-v">13px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Show</span>
+          <input type="checkbox" id="cb-ku-show" checked onchange="applyCardPreview()">
+        </div>
+      </div>
+
+      <!-- ARABIC NAME -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">🟢 Arabic Name</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Color</span>
+          <input type="color" id="cb-ar-c" value="#ffffff" oninput="document.getElementById('cb-ar-ct').value=this.value;applyCardPreview()">
+          <input type="text" id="cb-ar-ct" value="#ffffff" oninput="if(this.value.match(/^#[0-9a-fA-F]{6}$/)){document.getElementById('cb-ar-c').value=this.value;applyCardPreview()}">
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Font Size</span>
+          <input type="range" min="10" max="22" value="12" id="cb-ar-fs" oninput="document.getElementById('cb-ar-fs-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-ar-fs-v">12px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Show</span>
+          <input type="checkbox" id="cb-ar-show" checked onchange="applyCardPreview()">
+        </div>
+      </div>
+
+      <!-- DESCRIPTION -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">📝 Description</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Color</span>
+          <input type="color" id="cb-desc-c" value="#ffffffbf" oninput="applyCardPreview()">
+          <input type="text" id="cb-desc-ct" value="rgba(255,255,255,0.75)" oninput="applyCardPreview()">
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Font Size</span>
+          <input type="range" min="10" max="18" value="12" id="cb-desc-fs" oninput="document.getElementById('cb-desc-fs-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-desc-fs-v">12px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Show</span>
+          <input type="checkbox" id="cb-desc-show" checked onchange="applyCardPreview()">
+        </div>
+      </div>
+
+      <!-- PRICE -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">💰 Price</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Color</span>
+          <input type="color" id="cb-price-c" value="#5c3d1e" oninput="document.getElementById('cb-price-ct').value=this.value;applyCardPreview()">
+          <input type="text" id="cb-price-ct" value="#5c3d1e" oninput="if(this.value.match(/^#[0-9a-fA-F]{6}$/)){document.getElementById('cb-price-c').value=this.value;applyCardPreview()}">
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Font Size</span>
+          <input type="range" min="11" max="24" value="14" id="cb-price-fs" oninput="document.getElementById('cb-price-fs-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-price-fs-v">14px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Position</span>
+          <select id="cb-price-pos" onchange="applyCardPreview()">
+            <option value="bottom-left">Bottom Left</option>
+            <option value="bottom-right">Bottom Right</option>
+            <option value="top-right">Top Right</option>
+            <option value="inline">Inline (after name)</option>
+          </select>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Show</span>
+          <input type="checkbox" id="cb-price-show" checked onchange="applyCardPreview()">
+        </div>
+      </div>
+
+      <!-- PADDING -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">📐 Text Padding</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Top / Bottom</span>
+          <input type="range" min="4" max="32" value="14" id="cb-pad-v" oninput="document.getElementById('cb-pad-v-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-pad-v-v">14px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Left / Right</span>
+          <input type="range" min="4" max="40" value="20" id="cb-pad-h" oninput="document.getElementById('cb-pad-h-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-pad-h-v">20px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Gap Between Lines</span>
+          <input type="range" min="0" max="16" value="5" id="cb-line-gap" oninput="document.getElementById('cb-line-gap-v').textContent=this.value+'px';applyCardPreview()">
+          <span class="ctrl-val" id="cb-line-gap-v">5px</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-headerbuilder">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Category Header Builder</div>
+      <div class="page-sub">Control the big photo + overlay + text on every category section</div>
+    </div>
+    <button class="btn btn-gold" onclick="saveHeaderLayout()">💾 Save Layout</button>
+  </div>
+
+  <div class="builder-wrap">
+    <!-- LIVE PREVIEW -->
+    <div class="builder-canvas-wrap">
+      <div class="builder-canvas-label">🔴 Live Preview</div>
+      <div id="hb-preview">
+        <img id="hb-preview-img" src="" alt="" style="display:none;">
+        <div id="hb-preview-fallback" style="width:100%;height:100%;background:linear-gradient(135deg,#3a2010,#1a0e04);"></div>
+        <div id="hb-preview-overlay">
+          <div id="hb-preview-en">Grills</div>
+          <div id="hb-preview-ku">بژارتی</div>
+          <div id="hb-preview-ar">المشاوي</div>
+          <div id="hb-preview-line"></div>
+        </div>
+      </div>
+
+      <!-- upload a test image -->
+      <div style="margin-top:14px;">
+        <label class="img-upload-zone">
+          <div style="font-size:24px;margin-bottom:6px;">🖼️</div>
+          <div style="font-size:13px;color:var(--m);">Click to upload a preview image (optional)</div>
+          <input type="file" accept="image/*" onchange="hbLoadPreviewImage(this)">
+        </label>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="builder-controls">
+
+      <!-- OVERLAY -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">🌫️ Overlay</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Color</span>
+          <input type="color" id="hb-ov-c" value="#000000" oninput="applyHeaderPreview()">
+          <input type="text" id="hb-ov-ct" value="#000000" oninput="if(this.value.match(/^#[0-9a-fA-F]{6}$/)){document.getElementById('hb-ov-c').value=this.value;applyHeaderPreview()}">
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Opacity</span>
+          <input type="range" min="0" max="100" value="55" id="hb-ov-op" oninput="document.getElementById('hb-ov-op-v').textContent=this.value+'%';applyHeaderPreview()">
+          <span class="ctrl-val" id="hb-ov-op-v">55%</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Style</span>
+          <select id="hb-ov-style" onchange="applyHeaderPreview()">
+            <option value="solid">Solid</option>
+            <option value="top-fade" selected>Fade from top</option>
+            <option value="bottom-fade">Fade from bottom</option>
+            <option value="left-fade">Fade from left</option>
+            <option value="vignette">Vignette (edges)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- IMAGE -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">📷 Image</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Height</span>
+          <input type="range" min="150" max="600" value="320" id="hb-img-h" oninput="document.getElementById('hb-img-h-v').textContent=this.value+'px';applyHeaderPreview()">
+          <span class="ctrl-val" id="hb-img-h-v">320px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Brightness</span>
+          <input type="range" min="10" max="100" value="50" id="hb-img-br" oninput="document.getElementById('hb-img-br-v').textContent=this.value+'%';applyHeaderPreview()">
+          <span class="ctrl-val" id="hb-img-br-v">50%</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Saturation</span>
+          <input type="range" min="0" max="150" value="85" id="hb-img-sat" oninput="document.getElementById('hb-img-sat-v').textContent=this.value+'%';applyHeaderPreview()">
+          <span class="ctrl-val" id="hb-img-sat-v">85%</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Blur</span>
+          <input type="range" min="0" max="10" value="0" id="hb-img-blur" oninput="document.getElementById('hb-img-blur-v').textContent=this.value+'px';applyHeaderPreview()">
+          <span class="ctrl-val" id="hb-img-blur-v">0px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Focus Point</span>
+          <select id="hb-img-pos" onchange="applyHeaderPreview()">
+            <option value="center">Center</option>
+            <option value="top">Top</option>
+            <option value="bottom">Bottom</option>
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- TEXT POSITION -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">📍 Text Position</div>
+        <div class="pos-grid" id="hb-pos-grid">
+          <div class="pos-btn" data-pos="flex-start,flex-start" onclick="setHBPos(this)">↖ Top Left</div>
+          <div class="pos-btn" data-pos="flex-start,center" onclick="setHBPos(this)">↑ Top Center</div>
+          <div class="pos-btn" data-pos="flex-start,flex-end" onclick="setHBPos(this)">↗ Top Right</div>
+          <div class="pos-btn" data-pos="center,flex-start" onclick="setHBPos(this)">← Mid Left</div>
+          <div class="pos-btn" data-pos="center,center" onclick="setHBPos(this)">⊕ Center</div>
+          <div class="pos-btn" data-pos="center,flex-end" onclick="setHBPos(this)">→ Mid Right</div>
+          <div class="pos-btn active" data-pos="flex-end,flex-start" onclick="setHBPos(this)">↙ Bot Left</div>
+          <div class="pos-btn" data-pos="flex-end,center" onclick="setHBPos(this)">↓ Bot Center</div>
+          <div class="pos-btn" data-pos="flex-end,flex-end" onclick="setHBPos(this)">↘ Bot Right</div>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Padding from edge</span>
+          <input type="range" min="0" max="80" value="28" id="hb-pad" oninput="document.getElementById('hb-pad-v').textContent=this.value+'px';applyHeaderPreview()">
+          <span class="ctrl-val" id="hb-pad-v">28px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Text Align</span>
+          <select id="hb-text-align" onchange="applyHeaderPreview()">
+            <option value="left" selected>Left</option>
+            <option value="center">Center</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- EN TITLE -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">🇬🇧 English Title</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Color</span>
+          <input type="color" id="hb-en-c" value="#ffffff" oninput="document.getElementById('hb-en-ct').value=this.value;applyHeaderPreview()">
+          <input type="text" id="hb-en-ct" value="#ffffff" oninput="if(this.value.match(/^#[0-9a-fA-F]{6}$/)){document.getElementById('hb-en-c').value=this.value;applyHeaderPreview()}">
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Font Size</span>
+          <input type="range" min="20" max="100" value="54" id="hb-en-fs" oninput="document.getElementById('hb-en-fs-v').textContent=this.value+'px';applyHeaderPreview()">
+          <span class="ctrl-val" id="hb-en-fs-v">54px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Letter Spacing</span>
+          <input type="range" min="0" max="20" step="0.5" value="4" id="hb-en-ls" oninput="document.getElementById('hb-en-ls-v').textContent=this.value+'px';applyHeaderPreview()">
+          <span class="ctrl-val" id="hb-en-ls-v">4px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Show</span>
+          <input type="checkbox" id="hb-en-show" checked onchange="applyHeaderPreview()">
+        </div>
+      </div>
+
+      <!-- KU TITLE -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">🟡 Kurdish Title</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Color</span>
+          <input type="color" id="hb-ku-c" value="#c9a84c" oninput="document.getElementById('hb-ku-ct').value=this.value;applyHeaderPreview()">
+          <input type="text" id="hb-ku-ct" value="#c9a84c" oninput="if(this.value.match(/^#[0-9a-fA-F]{6}$/)){document.getElementById('hb-ku-c').value=this.value;applyHeaderPreview()}">
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Font Size</span>
+          <input type="range" min="12" max="52" value="24" id="hb-ku-fs" oninput="document.getElementById('hb-ku-fs-v').textContent=this.value+'px';applyHeaderPreview()">
+          <span class="ctrl-val" id="hb-ku-fs-v">24px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Show</span>
+          <input type="checkbox" id="hb-ku-show" checked onchange="applyHeaderPreview()">
+        </div>
+      </div>
+
+      <!-- AR TITLE -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">🟢 Arabic Title</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Color</span>
+          <input type="color" id="hb-ar-c" value="#ede0c4" oninput="document.getElementById('hb-ar-ct').value=this.value;applyHeaderPreview()">
+          <input type="text" id="hb-ar-ct" value="#ede0c4" oninput="if(this.value.match(/^#[0-9a-fA-F]{6}$/)){document.getElementById('hb-ar-c').value=this.value;applyHeaderPreview()}">
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Font Size</span>
+          <input type="range" min="10" max="44" value="20" id="hb-ar-fs" oninput="document.getElementById('hb-ar-fs-v').textContent=this.value+'px';applyHeaderPreview()">
+          <span class="ctrl-val" id="hb-ar-fs-v">20px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Show</span>
+          <input type="checkbox" id="hb-ar-show" checked onchange="applyHeaderPreview()">
+        </div>
+      </div>
+
+      <!-- GOLD LINE -->
+      <div class="ctrl-section">
+        <div class="ctrl-title">— Decorative Line</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Color</span>
+          <input type="color" id="hb-line-c" value="#c9a84c" oninput="applyHeaderPreview()">
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Width</span>
+          <input type="range" min="0" max="200" value="60" id="hb-line-w" oninput="document.getElementById('hb-line-w-v').textContent=this.value+'px';applyHeaderPreview()">
+          <span class="ctrl-val" id="hb-line-w-v">60px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Thickness</span>
+          <input type="range" min="0" max="8" value="2" id="hb-line-h" oninput="document.getElementById('hb-line-h-v').textContent=this.value+'px';applyHeaderPreview()">
+          <span class="ctrl-val" id="hb-line-h-v">2px</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Show</span>
+          <input type="checkbox" id="hb-line-show" checked onchange="applyHeaderPreview()">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+    <!-- ══ BRANDING PAGE ══ -->
+    <div class="page" id="page-branding">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Images & Branding</div>
+          <div class="page-sub">Control every image and visual identity element on the menu</div>
+        </div>
+        <button class="btn btn-gold" onclick="saveBranding()">💾 Save All</button>
+      </div>
+
+      <!-- LOGO -->
+      <div class="color-section">
+        <div class="color-section-title">🏷️ Logo & Restaurant Name</div>
+        <div class="form-grid">
+          <div class="fg">
+            <label>Restaurant Name (shown on nav bar & language screen)</label>
+            <input type="text" id="b-name" placeholder="XANEDAN" value="XANEDAN">
+          </div>
+          <div class="fg">
+            <label>Tagline (shown under name on language screen)</label>
+            <input type="text" id="b-tagline" placeholder="Cafe &amp; Rest · Akre · Kurdistan">
+          </div>
+        </div>
+        <div class="fg" style="margin-top:12px;">
+          <label>Logo Image (shown left of name in nav bar)</label>
+          <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-top:6px;">
+            <div id="b-logo-preview" style="width:60px;height:60px;border-radius:8px;background:var(--s3);border:1px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden;flex-shrink:0;">🏰</div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+              <label style="display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#000;padding:8px 16px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;width:fit-content;">
+                📤 Upload Logo
+                <input type="file" accept="image/*" style="display:none;" onchange="uploadBrandingImage(this,'b-logo-preview','b-logo-url')">
+              </label>
+              <input type="text" id="b-logo-url" placeholder="Or paste URL..." style="background:var(--s2);border:1px solid var(--border2);color:var(--w);padding:8px 12px;border-radius:7px;font-size:12px;outline:none;" oninput="previewBrandingImg(this.value,'b-logo-preview')">
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:12px;color:var(--m);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:12px;">Restaurant Name Color (nav bar + hero)</div>
+        <div class="color-grid">
+          <div class="color-item">
+            <label>Name Color (single unified color)</label>
+            <div class="color-row">
+              <input type="color" id="b-name-color" value="#c9a84c" oninput="syncColor('b-name-color','b-name-color-t')">
+              <input type="text" id="b-name-color-t" value="#c9a84c" oninput="syncText('b-name-color-t','b-name-color')">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Nav Bar Background</label>
+            <div class="color-row">
+              <input type="color" id="b-nav-bg" value="#debf97" oninput="syncColor('b-nav-bg','b-nav-bg-t')">
+              <input type="text" id="b-nav-bg-t" value="#debf97" oninput="syncText('b-nav-bg-t','b-nav-bg')">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Nav Text Color</label>
+            <div class="color-row">
+              <input type="color" id="b-nav-text" value="#1a0e04" oninput="syncColor('b-nav-text','b-nav-text-t')">
+              <input type="text" id="b-nav-text-t" value="#1a0e04" oninput="syncText('b-nav-text-t','b-nav-text')">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LANGUAGE SCREEN IMAGE -->
+      <div class="color-section">
+        <div class="color-section-title">🌐 Language Selection Screen (First screen)</div>
+        <div class="info-box" style="margin-bottom:16px;">This is the first screen users see with the 3 language buttons (EN / KU / AR). Upload a background image for it.</div>
+        <div style="background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#e74c3c;line-height:1.7;">
+          ⚠️ <strong>Before uploading:</strong> Make sure Firebase Storage Rules allow writes.<br>
+          Go to <strong>Firebase Console → Storage → Rules</strong> and set:<br>
+          <code style="background:rgba(0,0,0,.3);padding:4px 8px;border-radius:4px;font-size:12px;display:inline-block;margin-top:4px;">allow read, write: if true;</code><br>
+          <span style="opacity:.7;font-size:12px;">Without this, all uploads will fail silently.</span>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+          <div id="b-ls-preview" style="width:160px;height:100px;border-radius:8px;background:linear-gradient(135deg,#2a1a06,#1a0e04);border:1px dashed var(--border2);overflow:hidden;flex-shrink:0;">
+            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;opacity:.3;">🌄</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+            <label style="display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#000;padding:8px 16px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;width:fit-content;">
+              📤 Upload Background
+              <input type="file" accept="image/*" style="display:none;" onchange="uploadBrandingImage(this,'b-ls-preview','b-ls-url')">
+            </label>
+            <input type="text" id="b-ls-url" placeholder="Or paste image URL..." style="background:var(--s2);border:1px solid var(--border2);color:var(--w);padding:8px 12px;border-radius:7px;font-size:12px;outline:none;" oninput="previewBrandingImg(this.value,'b-ls-preview')">
+            <div style="font-size:12px;color:var(--m);">Brightness: <span id="b-ls-br-v">38%</span></div>
+            <input type="range" min="5" max="100" value="38" id="b-ls-br" oninput="document.getElementById('b-ls-br-v').textContent=this.value+'%';" style="accent-color:var(--gold);width:100%;">
+          </div>
+        </div>
+        <div class="color-grid" style="margin-top:16px;">
+          <div class="color-item">
+            <label>Name Color on Lang Screen</label>
+            <div class="color-row">
+              <input type="color" id="b-ls-name-c" value="#c9a84c" oninput="syncColor('b-ls-name-c','b-ls-name-ct')">
+              <input type="text" id="b-ls-name-ct" value="#c9a84c" oninput="syncText('b-ls-name-ct','b-ls-name-c')">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Tagline Color</label>
+            <div class="color-row">
+              <input type="color" id="b-ls-tag-c" value="#f0ece4" oninput="syncColor('b-ls-tag-c','b-ls-tag-ct')">
+              <input type="text" id="b-ls-tag-ct" value="#f0ece4" oninput="syncText('b-ls-tag-ct','b-ls-tag-c')">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Button Border Color</label>
+            <div class="color-row">
+              <input type="color" id="b-ls-btn-c" value="#c9a84c" oninput="syncColor('b-ls-btn-c','b-ls-btn-ct')">
+              <input type="text" id="b-ls-btn-ct" value="#c9a84c" oninput="syncText('b-ls-btn-ct','b-ls-btn-c')">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HERO IMAGE -->
+      <div class="color-section">
+        <div class="color-section-title">🏔️ Hero / Main Banner Image (Full screen after language select)</div>
+        <div class="info-box" style="margin-bottom:16px;">This is the big full-screen image users see after choosing a language, with the restaurant name and tagline over it.</div>
+        <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+          <div id="b-hero-preview" style="width:160px;height:100px;border-radius:8px;background:linear-gradient(135deg,#3a2010,#1a0e04);border:1px dashed var(--border2);overflow:hidden;flex-shrink:0;">
+            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;opacity:.3;">🌅</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+            <label style="display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#000;padding:8px 16px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;width:fit-content;">
+              📤 Upload Hero Image
+              <input type="file" accept="image/*" style="display:none;" onchange="uploadBrandingImage(this,'b-hero-preview','b-hero-url')">
+            </label>
+            <input type="text" id="b-hero-url" placeholder="Or paste image URL..." style="background:var(--s2);border:1px solid var(--border2);color:var(--w);padding:8px 12px;border-radius:7px;font-size:12px;outline:none;" oninput="previewBrandingImg(this.value,'b-hero-preview')">
+            <div style="font-size:12px;color:var(--m);">Brightness: <span id="b-hero-br-v">55%</span></div>
+            <input type="range" min="5" max="100" value="55" id="b-hero-br" oninput="document.getElementById('b-hero-br-v').textContent=this.value+'%';" style="accent-color:var(--gold);width:100%;">
+          </div>
+        </div>
+        <div class="color-grid" style="margin-top:16px;">
+          <div class="color-item">
+            <label>Hero Eye Text (top small text)</label>
+            <div class="color-row">
+              <input type="color" id="b-hero-eye-c" value="#c9a84c" oninput="syncColor('b-hero-eye-c','b-hero-eye-ct')">
+              <input type="text" id="b-hero-eye-ct" value="#c9a84c" oninput="syncText('b-hero-eye-ct','b-hero-eye-c')">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Hero Subtitle Color</label>
+            <div class="color-row">
+              <input type="color" id="b-hero-sub-c" value="#f0ece4" oninput="syncColor('b-hero-sub-c','b-hero-sub-ct')">
+              <input type="text" id="b-hero-sub-ct" value="#f0ece4" oninput="syncText('b-hero-sub-ct','b-hero-sub-c')">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Hero Title Color (single color)</label>
+            <div class="color-row">
+              <input type="color" id="b-hero-title-c" value="#f0ece4" oninput="syncColor('b-hero-title-c','b-hero-title-ct')">
+              <input type="text" id="b-hero-title-ct" value="#f0ece4" oninput="syncText('b-hero-title-ct','b-hero-title-c')">
+            </div>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top:14px;">
+          <div class="fg">
+            <label>Hero Eye Text (small text above name)</label>
+            <input type="text" id="b-hero-eye" placeholder="Akre · Kurdistan">
+          </div>
+          <div class="fg">
+            <label>Hero Subtitle Text</label>
+            <input type="text" id="b-hero-sub" placeholder="Authentic · Beauty · Ancestry">
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE BACKGROUND -->
+      <div class="color-section">
+        <div class="color-section-title">🌑 Page Background</div>
+        <div class="color-grid">
+          <div class="color-item">
+            <label>Page Background Color</label>
+            <div class="color-row">
+              <input type="color" id="b-page-bg" value="#0a0a0a" oninput="syncColor('b-page-bg','b-page-bg-t')">
+              <input type="text" id="b-page-bg-t" value="#0a0a0a" oninput="syncText('b-page-bg-t','b-page-bg')">
+            </div>
+          </div>
+          <div class="color-item">
+            <label>Gold / Accent Color</label>
+            <div class="color-row">
+              <input type="color" id="b-gold" value="#c9a84c" oninput="syncColor('b-gold','b-gold-t')">
+              <input type="text" id="b-gold-t" value="#c9a84c" oninput="syncText('b-gold-t','b-gold')">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+        <button class="btn btn-gold" onclick="saveBranding()">💾 Save All Branding</button>
+      </div>
+    </div>
+
+</main><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══ ITEM MODAL ══ -->
+<div class="modal-bg" id="item-modal">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal('item-modal')">×</button>
+    <h2 id="item-modal-title">Add Menu Item</h2>
+
+    <div class="info-box" id="item-modal-info" style="display:none;"></div>
+
+    <!-- Language tabs -->
+    <div class="lang-tabs-header">
+      <button class="lang-tab-btn active" onclick="switchLangTab('en',this)">🇬🇧 English</button>
+      <button class="lang-tab-btn" onclick="switchLangTab('ku',this)">🟡 Kurdish</button>
+      <button class="lang-tab-btn" onclick="switchLangTab('ar',this)">🟢 Arabic</button>
+    </div>
+
+    <!-- English fields -->
+    <div id="ltab-en">
+      <div class="form-grid">
+        <div class="fg form-full">
+          <label>Name (English)</label>
+          <input type="text" id="i-name-en" placeholder="e.g. Grilled Chicken">
+        </div>
+        <div class="fg form-full">
+          <label>Description (English)</label>
+          <textarea id="i-desc-en" placeholder="Short description in English..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kurdish fields -->
+    <div id="ltab-ku" style="display:none;">
+      <div class="form-grid">
+        <div class="fg form-full fg-rtl">
+          <label>Name (Kurdish)</label>
+          <input type="text" id="i-name-ku" placeholder="ناوی بەکوردی..." style="direction:rtl;font-family:'Noto Kufi Arabic',sans-serif;">
+        </div>
+        <div class="fg form-full fg-rtl">
+          <label>Description (Kurdish)</label>
+          <textarea id="i-desc-ku" placeholder="وەسفی کورت بەکوردی..." style="direction:rtl;font-family:'Noto Kufi Arabic',sans-serif;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arabic fields -->
+    <div id="ltab-ar" style="display:none;">
+      <div class="form-grid">
+        <div class="fg form-full fg-rtl">
+          <label>Name (Arabic)</label>
+          <input type="text" id="i-name-ar" placeholder="الاسم بالعربية..." style="direction:rtl;font-family:'Noto Kufi Arabic',sans-serif;">
+        </div>
+        <div class="fg form-full fg-rtl">
+          <label>Description (Arabic)</label>
+          <textarea id="i-desc-ar" placeholder="وصف قصير بالعربية..." style="direction:rtl;font-family:'Noto Kufi Arabic',sans-serif;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Price + Category + Image -->
+    <div class="form-grid col3">
+      <div class="fg">
+        <label>Price (IQD)</label>
+        <input type="number" id="i-price" placeholder="15000">
+      </div>
+      <div class="fg">
+        <label>Category</label>
+        <select id="i-category">
+          <option value="">Select category...</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Sort Order</label>
+        <input type="number" id="i-order" placeholder="1" value="1">
+      </div>
+    </div>
+
+    <div class="fg" style="margin-top:4px;">
+      <label>Product Photo</label>
+      <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
+        <div id="upload-preview" style="width:90px;height:70px;border-radius:8px;background:var(--s3);border:1px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;overflow:hidden;">📷</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+          <label style="display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#000;padding:9px 18px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;width:fit-content;">
+            📤 Upload Photo
+            <input type="file" id="i-photo-file" accept="image/*" style="display:none;" onchange="handlePhotoUpload(this)">
+          </label>
+          <div style="font-size:11px;color:var(--m);line-height:1.5;">Or paste a URL:</div>
+          <input type="text" id="i-photo" placeholder="https://..." oninput="previewPhotoUrl(this.value)" style="background:var(--s2);border:1px solid var(--border2);color:var(--w);padding:8px 12px;border-radius:7px;font-family:var(--font);font-size:12px;outline:none;">
+        </div>
+      </div>
+      <div id="upload-status" style="font-size:12px;color:var(--gold);margin-top:6px;display:none;"></div>
+    </div>
+
+    <!-- Color overrides per item -->
+    <div class="divider"></div>
+    <div style="font-size:12px;color:var(--m);margin-bottom:14px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;">
+      🎨 Color Overrides (optional — leave blank to use global colors)
+    </div>
+    <div class="color-grid" style="grid-template-columns:repeat(auto-fill,minmax(170px,1fr));">
+      <div class="color-item">
+        <label>Card Background</label>
+        <div class="color-row">
+          <input type="color" id="i-c-bg" value="#debf97" oninput="syncColor('i-c-bg','i-ct-bg')">
+          <input type="text" id="i-ct-bg" value="" placeholder="inherit" oninput="syncText('i-ct-bg','i-c-bg')">
+        </div>
+      </div>
+      <div class="color-item">
+        <label>EN Name Color</label>
+        <div class="color-row">
+          <input type="color" id="i-c-en" value="#c8860a" oninput="syncColor('i-c-en','i-ct-en')">
+          <input type="text" id="i-ct-en" value="" placeholder="inherit" oninput="syncText('i-ct-en','i-c-en')">
+        </div>
+      </div>
+      <div class="color-item">
+        <label>Price Color</label>
+        <div class="color-row">
+          <input type="color" id="i-c-price" value="#5c3d1e" oninput="syncColor('i-c-price','i-ct-price')">
+          <input type="text" id="i-ct-price" value="" placeholder="inherit" oninput="syncText('i-ct-price','i-c-price')">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('item-modal')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveItem()">💾 Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CATEGORY MODAL ══ -->
+<div class="modal-bg" id="cat-modal">
+  <div class="modal" style="max-width:500px;">
+    <button class="modal-x" onclick="closeModal('cat-modal')">×</button>
+    <h2 id="cat-modal-title">Add Category</h2>
+    <div class="fg" style="margin-bottom:14px;">
+      <label>Name (English)</label>
+      <input type="text" id="c-name-en" placeholder="e.g. Main Food">
+    </div>
+    <div class="fg" style="margin-bottom:14px;">
+      <label>Name (Kurdish)</label>
+      <input type="text" id="c-name-ku" placeholder="ناوی کوردی..." style="direction:rtl;font-family:'Noto Kufi Arabic',sans-serif;">
+    </div>
+    <div class="fg" style="margin-bottom:14px;">
+      <label>Name (Arabic)</label>
+      <input type="text" id="c-name-ar" placeholder="الاسم بالعربية..." style="direction:rtl;font-family:'Noto Kufi Arabic',sans-serif;">
+    </div>
+    <div class="fg" style="margin-bottom:14px;">
+      <label>Category ID (no spaces, e.g. mainfood)</label>
+      <input type="text" id="c-id" placeholder="mainfood">
+    </div>
+    <div class="fg">
+      <label>Display Order</label>
+      <input type="number" id="c-order" value="1">
+    </div>
+
+    <div class="fg" style="margin-top:4px;">
+      <label>Category Header Image</label>
+      <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-top:6px;">
+        <div id="c-img-preview" style="width:100px;height:70px;border-radius:8px;background:var(--s3);border:1px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;flex-shrink:0;">🖼️</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+          <label style="display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#000;padding:8px 14px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;width:fit-content;">
+            📷 Choose Image
+            <input type="file" accept="image/*" style="display:none;" onchange="uploadCatImage(this)">
+          </label>
+          <div id="c-img-status" style="font-size:12px;color:var(--gold);display:none;"></div>
+          <input type="text" id="c-image-url" placeholder="Or paste image URL..." style="background:var(--s2);border:1px solid var(--border2);color:var(--w);padding:8px 12px;border-radius:7px;font-size:12px;outline:none;" oninput="previewCatImg(this.value)">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('cat-modal')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveCat()">💾 Save Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     CARD LAYOUT BUILDER PAGE
+══════════════════════════════════════════════════════ -->
+<style>
+/* ── builder shared ── */
+.builder-wrap { display:grid; grid-template-columns:1fr 380px; gap:24px; align-items:start; }
+@media(max-width:1100px){ .builder-wrap{grid-template-columns:1fr;} }
+.builder-canvas-wrap {
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:var(--radius); padding:24px; min-height:400px;
+  display:flex; flex-direction:column;
+}
+.builder-canvas-label { font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--m);margin-bottom:14px;font-weight:600; }
+.builder-controls { background:var(--s1); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
+.ctrl-section { margin-bottom:20px; }
+.ctrl-title { font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--m);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border); }
+.ctrl-row { display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px; }
+.ctrl-label { font-size:12px;color:var(--m);flex-shrink:0;min-width:120px; }
+.ctrl-val { font-size:12px;color:var(--gold);font-weight:600;min-width:36px;text-align:right; }
+.ctrl-row input[type=range] { flex:1;accent-color:var(--gold); }
+.ctrl-row select { background:var(--s2);border:1px solid var(--border2);color:var(--w);padding:5px 8px;border-radius:5px;font-size:12px;outline:none;flex:1; }
+.ctrl-row input[type=color] { width:36px;height:28px;border:1px solid var(--border2);border-radius:5px;background:var(--s2);padding:2px;cursor:pointer; }
+.ctrl-row input[type=text] { flex:1;background:var(--s2);border:1px solid var(--border2);color:var(--w);padding:5px 8px;border-radius:5px;font-size:12px;outline:none; }
+.ctrl-row input[type=checkbox] { width:16px;height:16px;accent-color:var(--gold); }
+.pos-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:10px; }
+.pos-btn { background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:8px 4px;cursor:pointer;font-size:10px;color:var(--m);text-align:center;transition:all .2s; }
+.pos-btn:hover { border-color:var(--gold);color:var(--w); }
+.pos-btn.active { background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold); }
+/* live card preview inside builder */
+#cb-preview-card {
+  position:relative;
+  border-radius:14px;
+  overflow:hidden;
+  min-height:96px;
+  background:#debf97;
+  box-shadow:0 4px 16px rgba(0,0,0,.3);
+  transition:all .3s;
+}
+#cb-card-image-left { width:100px;flex-shrink:0;background:#c9a87d;display:flex;align-items:center;justify-content:center;font-size:28px;transition:width .3s; }
+#cb-card-image-top { width:100%;height:140px;background:#c9a87d;display:flex;align-items:center;justify-content:center;font-size:40px;transition:height .3s;display:none; }
+#cb-card-body { flex:1;position:relative;padding:14px 20px 30px;display:flex;flex-direction:column;gap:4px; }
+#cb-card-name { font-size:17px;font-weight:700;color:#c8860a;transition:all .3s; }
+#cb-card-ku { font-size:13px;color:#fff;opacity:.9; }
+#cb-card-ar { font-size:12px;color:#fff;opacity:.75; }
+#cb-card-desc { font-size:12px;color:rgba(255,255,255,.75);font-style:italic;margin-top:4px; }
+#cb-card-price { font-size:14px;font-weight:600;color:#5c3d1e;transition:all .3s; }
+/* header builder preview */
+#hb-preview {
+  position:relative;height:320px;border-radius:var(--radius);overflow:hidden;background:linear-gradient(135deg,#2a1a06,#1a0e04);
+}
+#hb-preview-img { width:100%;height:100%;object-fit:cover;display:block;transition:filter .3s; }
+#hb-preview-overlay { position:absolute;inset:0;background:rgba(0,0,0,0.5);transition:background .3s;display:flex;flex-direction:column;justify-content:flex-end;padding:28px 36px;gap:6px; }
+#hb-preview-en { font-family:'Cinzel',serif;font-size:54px;font-weight:600;letter-spacing:.2em;color:#fff;line-height:1.1;transition:all .3s; }
+#hb-preview-ku { font-family:'Noto Kufi Arabic',sans-serif;font-size:24px;color:#c9a84c;transition:all .3s; }
+#hb-preview-ar { font-family:'Noto Kufi Arabic',sans-serif;font-size:20px;color:rgba(240,236,228,.7);transition:all .3s; }
+#hb-preview-line { width:60px;height:2px;background:#c9a84c;margin-top:4px;transition:all .3s; }
+.img-upload-zone { border:2px dashed var(--border2);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:12px; }
+.img-upload-zone:hover { border-color:var(--gold); }
+.img-upload-zone input { display:none; }
+</style>
+
+<!-- CARD LAYOUT BUILDER -->
+
+
+<!-- ══════════════════════════════════════════════════════
+     CATEGORY HEADER BUILDER PAGE
+══════════════════════════════════════════════════════ -->
+
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon">✅</span>
+  <span id="toast-msg">Saved successfully!</span>
+</div>
+
+<!-- FIREBASE + APP JS -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDocs, addDoc, updateDoc, deleteDoc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCrJ1fDMI2Ni6-B5ICsX14XNEFVwUaTH-8",
+  authDomain: "menu-5419d.firebaseapp.com",
+  projectId: "menu-5419d",
+  storageBucket: "menu-5419d.firebasestorage.app",
+  messagingSenderId: "133756326207",
+  appId: "1:133756326207:web:fa5cfa2e1e15889f7bc38a",
+  measurementId: "G-KEG4R3KZYF"
+};
+
+const fireApp = initializeApp(firebaseConfig);
+const auth = getAuth(fireApp);
+const db = getFirestore(fireApp);
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let allItems = [];
+let allCats = [];
+let editingItemId = null;
+let editingCatId = null;
+let currentUser = null;
+
+// ── AUTH ───────────────────────────────────────────────────────────────────
+
+
+
+
+window.doLogin = async function() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    errEl.style.display = 'block';
+    errEl.textContent = e.code === 'auth/invalid-credential'
+      ? 'Invalid email or password.' : e.message;
+  }
+};
+
+window.doLogout = async function() {
+  await signOut(auth);
+  document.getElementById('app').classList.remove('on');
+  document.getElementById('login-screen').style.display = 'flex';
+};
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').classList.add('on');
+    document.getElementById('sb-user-email').textContent = user.email;
+    loadAll();
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').classList.remove('on');
+  }
+});
+
+// ── LOAD ALL ───────────────────────────────────────────────────────────────
+async function loadAll() {
+  await loadCategories();
+  await loadItems();
+  await loadSettings();
+  loadColors();
+  loadBranding();
+}
+
+// ── CATEGORIES ─────────────────────────────────────────────────────────────
+async function loadCategories() {
+  try {
+    const snap = await getDocs(query(collection(db, 'categories'), orderBy('order')));
+    allCats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCats();
+    populateCatSelects();
+    document.getElementById('stat-cats').textContent = allCats.length;
+  } catch(e) {
+    // If no categories yet, seed defaults
+    if (allCats.length === 0) seedDefaultCategories();
+  }
+}
+
+async function seedDefaultCategories() {
+  const defaults = [
+    { id:'breakfast', nameEn:'Breakfast', nameKu:'تێشتا سپێدی', nameAr:'وجبة الإفطار', order:1 },
+    { id:'mainfood', nameEn:'Main Food', nameKu:'خارنێتی سەرەکی', nameAr:'الطبق الرئيسي', order:2 },
+    { id:'kurdish', nameEn:'Kurdish Dishes', nameKu:'خارنێتی کوردی', nameAr:'الأكلات الكردية', order:3 },
+    { id:'grills', nameEn:'Grills', nameKu:'بژارتی', nameAr:'المشاوي', order:4 },
+    { id:'cold', nameEn:'Cold Drinks', nameKu:'فەخارنێتی سار', nameAr:'مشروبات باردة', order:5 },
+    { id:'hot', nameEn:'Hot Drinks', nameKu:'فەخارنێتی گەرم', nameAr:'مشروبات ساخنة', order:6 },
+    { id:'shakes', nameEn:'Shakes', nameKu:'شەیکس', nameAr:'عصائر', order:7 },
+    { id:'icecream', nameEn:'Ice Cream', nameKu:'ساردەمەنی', nameAr:'آيس كريم', order:8 },
+    { id:'sweets', nameEn:'Sweets & Crepes', nameKu:'شیرینی · کرێپس', nameAr:'حلويات وكريب', order:9 },
+    { id:'kunafa', nameEn:'Kunafa', nameKu:'کونافە', nameAr:'كنافة', order:10 },
+    { id:'fruits', nameEn:'Fruits', nameKu:'فێقی', nameAr:'فواكه', order:11 },
+    { id:'shisha', nameEn:'Shisha', nameKu:'نەرگیلە', nameAr:'شيشة', order:12 },
+  ];
+  for (const cat of defaults) {
+    await setDoc(doc(db, 'categories', cat.id), cat);
+  }
+  await loadCategories();
+}
+
+function renderCats() {
+  const tbody = document.getElementById('cats-tbody');
+  if (!allCats.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">🗂️</div><div class="empty-text">No categories yet</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = allCats.map((c,i) => `
+    <tr>
+      <td style="color:var(--m);font-size:12px;">${i+1}</td>
+      <td><strong>${c.nameEn||''}</strong></td>
+      <td style="font-family:'Noto Kufi Arabic',sans-serif;direction:rtl;">${c.nameKu||''}</td>
+      <td style="font-family:'Noto Kufi Arabic',sans-serif;direction:rtl;">${c.nameAr||''}</td>
+      <td><span class="badge badge-cat">${allItems.filter(it=>it.category===c.id).length} items</span></td>
+      <td>
+        <div class="td-actions">
+          <button class="btn btn-outline btn-sm" onclick="window.editCat('${c.id}')">✏️ Edit</button>
+          <button class="btn btn-red btn-sm" onclick="window.deleteCat('${c.id}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function populateCatSelects() {
+  const opts = allCats.map(c => `<option value="${c.id}">${c.nameEn}</option>`).join('');
+  document.getElementById('i-category').innerHTML = '<option value="">Select category...</option>' + opts;
+  const filter = document.getElementById('cat-filter');
+  filter.innerHTML = '<option value="">All Categories</option>' + opts;
+}
+
+// ── Category image upload ──────────────────────────────────────────
+window.uploadCatImage = async function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('c-img-status');
+  const setS = (msg, ok) => {
+    statusEl.style.display = 'block';
+    statusEl.style.color = ok===true ? 'var(--green)' : ok===false ? 'var(--red)' : 'var(--gold)';
+    statusEl.textContent = msg;
+  };
+  setS('⏳ Processing...');
+  try {
+    const b64 = await imageToBase64(file, 1400, 0.80);
+    document.getElementById('c-image-url').value = b64;
+    const prev = document.getElementById('c-img-preview');
+    prev.innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+    setS('✅ Ready — click Save', true);
+    setTimeout(() => { statusEl.style.display='none'; }, 3000);
+  } catch(e) {
+    setS('❌ ' + e.message, false);
+  }
+};
+
+window.previewCatImg = function(url) {
+  if (!url) return;
+  const prev = document.getElementById('c-img-preview');
+  if (prev) prev.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.parentElement.innerHTML='🖼️'">`;
+};
+
+window.openCatModal = function(id=null) {
+  editingCatId = id;
+  document.getElementById('cat-modal-title').textContent = id ? 'Edit Category' : 'Add Category';
+  // Reset image preview
+  document.getElementById('c-img-preview').innerHTML = '🖼️';
+  document.getElementById('c-image-url').value = '';
+  document.getElementById('c-img-status').style.display = 'none';
+
+  if (id) {
+    const c = allCats.find(x=>x.id===id);
+    if(c){
+      document.getElementById('c-name-en').value = c.nameEn||'';
+      document.getElementById('c-name-ku').value = c.nameKu||'';
+      document.getElementById('c-name-ar').value = c.nameAr||'';
+      document.getElementById('c-id').value = c.id||'';
+      document.getElementById('c-id').disabled = true;
+      document.getElementById('c-order').value = c.order||1;
+      // Load existing image
+      if (c.imageUrl) {
+        document.getElementById('c-image-url').value = c.imageUrl;
+        document.getElementById('c-img-preview').innerHTML = `<img src="${c.imageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+      }
+    }
+  } else {
+    ['c-name-en','c-name-ku','c-name-ar','c-id'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('c-id').disabled = false;
+    document.getElementById('c-order').value = allCats.length+1;
+  }
+  document.getElementById('cat-modal').classList.add('open');
+};
+
+window.editCat = window.openCatModal;
+
+window.saveCat = async function() {
+  const nameEn = document.getElementById('c-name-en').value.trim();
+  const nameKu = document.getElementById('c-name-ku').value.trim();
+  const nameAr = document.getElementById('c-name-ar').value.trim();
+  const id = document.getElementById('c-id').value.trim().toLowerCase().replace(/\s+/g,'');
+  const order = parseInt(document.getElementById('c-order').value)||1;
+  if (!nameEn || !id) { showToast('Category name and ID required','❌'); return; }
+  const imageUrl = document.getElementById('c-image-url').value.trim();
+  try {
+    const catData = {nameEn,nameKu,nameAr,order};
+    if (imageUrl) catData.imageUrl = imageUrl;
+    if (editingCatId) {
+      await updateDoc(doc(db,'categories',editingCatId), catData);
+    } else {
+      catData.id = id;
+      await setDoc(doc(db,'categories',id), catData);
+    }
+    await loadCategories();
+    closeModal('cat-modal');
+    showToast('Category saved!','✅');
+  } catch(e) { showToast('Error: '+e.message,'❌'); }
+};
+
+window.deleteCat = async function(id) {
+  if (!confirm('Delete this category? Items in it will not be deleted.')) return;
+  try {
+    await deleteDoc(doc(db,'categories',id));
+    await loadCategories();
+    showToast('Category deleted','✅');
+  } catch(e) { showToast('Error: '+e.message,'❌'); }
+};
+
+// ── ITEMS ──────────────────────────────────────────────────────────────────
+async function loadItems() {
+  try {
+    const snap = await getDocs(query(collection(db,'items'), orderBy('category')));
+    allItems = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    renderItems(allItems);
+    renderRecentItems();
+    document.getElementById('stat-items').textContent = allItems.length;
+  } catch(e) {
+    document.getElementById('items-tbody').innerHTML =
+      `<tr><td colspan="5" style="color:var(--red);padding:20px;">${e.message}</td></tr>`;
+  }
+}
+
+function renderItems(items) {
+  const tbody = document.getElementById('items-tbody');
+  if (!items.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="empty-icon">🍽️</div><div class="empty-text">No items yet. Click "+ Add New Item" to start.</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = items.map(item => {
+    const cat = allCats.find(c=>c.id===item.category);
+    const photoHtml = item.photo
+      ? `<img class="td-img" src="${item.photo}" alt="${item.nameEn}" onerror="this.outerHTML='<div class=td-img-empty>🍽️</div>'">`
+      : `<div class="td-img-empty">🍽️</div>`;
+    return `
+    <tr>
+      <td>${photoHtml}</td>
+      <td>
+        <div class="td-lang">
+          <span class="td-lang-en">${item.nameEn||''}</span>
+          <span class="td-lang-ku">${item.nameKu||''}</span>
+          <span class="td-lang-ar">${item.nameAr||''}</span>
+        </div>
+      </td>
+      <td><span class="badge badge-cat">${cat?.nameEn||item.category||'—'}</span></td>
+      <td style="color:var(--gold);font-weight:600;">${item.price ? Number(item.price).toLocaleString()+' IQD' : '—'}</td>
+      <td>
+        <div class="td-actions">
+          <button class="btn btn-outline btn-sm" onclick="window.openItemModal('${item.id}')">✏️ Edit</button>
+          <button class="btn btn-red btn-sm" onclick="window.deleteItem('${item.id}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderRecentItems() {
+  const tbody = document.getElementById('recent-items-tbody');
+  const recent = allItems.slice(0,6);
+  if (!recent.length) {
+    tbody.innerHTML = '<tr><td colspan="4"><div class="empty"><div class="empty-icon">🍽️</div><div class="empty-text">No items yet</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = recent.map(item => {
+    const cat = allCats.find(c=>c.id===item.category);
+    return `
+    <tr>
+      <td>${item.nameEn||'—'}</td>
+      <td><span class="badge badge-cat">${cat?.nameEn||item.category||'—'}</span></td>
+      <td style="color:var(--gold);">${item.price ? Number(item.price).toLocaleString()+' IQD' : '—'}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="window.openItemModal('${item.id}')">✏️ Edit</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+window.filterItems = function() {
+  const q = document.getElementById('item-search').value.toLowerCase();
+  const cat = document.getElementById('cat-filter').value;
+  const filtered = allItems.filter(item => {
+    const matchQ = !q || [item.nameEn,item.nameKu,item.nameAr].some(n=>(n||'').toLowerCase().includes(q));
+    const matchC = !cat || item.category === cat;
+    return matchQ && matchC;
+  });
+  renderItems(filtered);
+};
+
+window.openItemModal = async function(id=null) {
+  editingItemId = id;
+  document.getElementById('item-modal-title').textContent = id ? 'Edit Menu Item' : 'Add Menu Item';
+  document.getElementById('item-modal-info').style.display = 'none';
+  // Reset
+  ['i-name-en','i-name-ku','i-name-ar','i-desc-en','i-desc-ku','i-desc-ar','i-photo','i-ct-bg','i-ct-en','i-ct-price'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('i-price').value='';
+  document.getElementById('i-order').value='1';
+
+  if (id) {
+    const item = allItems.find(x=>x.id===id);
+    if (item) {
+      document.getElementById('i-name-en').value = item.nameEn||'';
+      document.getElementById('i-name-ku').value = item.nameKu||'';
+      document.getElementById('i-name-ar').value = item.nameAr||'';
+      document.getElementById('i-desc-en').value = item.descEn||'';
+      document.getElementById('i-desc-ku').value = item.descKu||'';
+      document.getElementById('i-desc-ar').value = item.descAr||'';
+      document.getElementById('i-price').value = item.price||'';
+      document.getElementById('i-category').value = item.category||'';
+      document.getElementById('i-photo').value = item.photo||'';
+      document.getElementById('i-order').value = item.order||1;
+      if(item.colorBg) { document.getElementById('i-c-bg').value=item.colorBg; document.getElementById('i-ct-bg').value=item.colorBg; }
+      if(item.colorEn) { document.getElementById('i-c-en').value=item.colorEn; document.getElementById('i-ct-en').value=item.colorEn; }
+      if(item.colorPrice) { document.getElementById('i-c-price').value=item.colorPrice; document.getElementById('i-ct-price').value=item.colorPrice; }
+    }
+  }
+  switchLangTab('en', document.querySelector('.lang-tab-btn'));
+  // reset photo preview
+  document.getElementById('upload-preview').innerHTML = '📷';
+  document.getElementById('upload-status').style.display = 'none';
+  const photoVal = document.getElementById('i-photo').value;
+  if (photoVal) window.previewPhotoUrl(photoVal);
+  document.getElementById('item-modal').classList.add('open');
+};
+
+window.saveItem = async function() {
+  const data = {
+    nameEn: document.getElementById('i-name-en').value.trim(),
+    nameKu: document.getElementById('i-name-ku').value.trim(),
+    nameAr: document.getElementById('i-name-ar').value.trim(),
+    descEn: document.getElementById('i-desc-en').value.trim(),
+    descKu: document.getElementById('i-desc-ku').value.trim(),
+    descAr: document.getElementById('i-desc-ar').value.trim(),
+    price: document.getElementById('i-price').value.trim(),
+    category: document.getElementById('i-category').value,
+    photo: document.getElementById('i-photo').value.trim(),
+    order: parseInt(document.getElementById('i-order').value)||1,
+    colorBg: document.getElementById('i-ct-bg').value.trim()||null,
+    colorEn: document.getElementById('i-ct-en').value.trim()||null,
+    colorPrice: document.getElementById('i-ct-price').value.trim()||null,
+    updatedAt: new Date().toISOString(),
+  };
+  if (!data.nameEn) { showToast('English name is required','❌'); return; }
+  try {
+    if (editingItemId) {
+      await updateDoc(doc(db,'items',editingItemId), data);
+      showToast('Item updated!','✅');
+    } else {
+      data.createdAt = new Date().toISOString();
+      await addDoc(collection(db,'items'), data);
+      showToast('Item added!','✅');
+    }
+    await loadItems();
+    closeModal('item-modal');
+  } catch(e) { showToast('Error: '+e.message,'❌'); }
+};
+
+window.deleteItem = async function(id) {
+  if (!confirm('Delete this item?')) return;
+  try {
+    await deleteDoc(doc(db,'items',id));
+    await loadItems();
+    showToast('Item deleted','✅');
+  } catch(e) { showToast('Error: '+e.message,'❌'); }
+};
+
+// ── COLORS ─────────────────────────────────────────────────────────────────
+async function loadColors() {
+  try {
+    const snap = await getDoc(doc(db,'settings','colors'));
+    if (snap.exists()) {
+      const d = snap.data();
+      Object.entries(d).forEach(([k,v]) => {
+        const el = document.getElementById(k);
+        const tel = document.getElementById('t'+k);
+        if(el) el.value = v;
+        if(tel) tel.value = v;
+      });
+    }
+    livePreview();
+  } catch(e) {}
+}
+
+window.saveColors = async function() {
+  const colors = {};
+  ['c-card-bg','c-card-hover','c-card-border','c-en','c-ku','c-ar','c-desc','c-price','c-bg','c-gold','c-nav','c-nav-text'].forEach(id => {
+    const tel = document.getElementById('t'+id);
+    colors[id] = tel ? tel.value : document.getElementById(id).value;
+  });
+  try {
+    await setDoc(doc(db,'settings','colors'), colors);
+    showToast('Colors saved! Refresh the menu to see changes.','✅');
+  } catch(e) { showToast('Error: '+e.message,'❌'); }
+};
+
+window.livePreview = function() {
+  const bg = document.getElementById('ct-card-bg')?.value || '#debf97';
+  const en = document.getElementById('ct-en')?.value || '#c8860a';
+  const ku = document.getElementById('ct-ku')?.value || '#ffffff';
+  const ar = document.getElementById('ct-ar')?.value || '#ffffff';
+  const desc = document.getElementById('ct-desc')?.value || 'rgba(255,255,255,0.75)';
+  const price = document.getElementById('ct-price')?.value || '#5c3d1e';
+  const card = document.getElementById('preview-card');
+  if(card) card.style.background = bg;
+  const pen = document.getElementById('preview-en');
+  if(pen) pen.style.color = en;
+  const pku = document.getElementById('preview-ku');
+  if(pku) pku.style.color = ku;
+  const par = document.getElementById('preview-ar');
+  if(par) par.style.color = ar;
+  const pdesc = document.getElementById('preview-desc');
+  if(pdesc) pdesc.style.color = desc;
+  const ppr = document.getElementById('preview-price');
+  if(ppr) ppr.style.color = price;
+};
+
+window.updatePreviewRadius = function() {
+  const r = document.getElementById('sl-radius').value;
+  const p = document.getElementById('layout-preview');
+  if(p) p.style.borderRadius = r+'px';
+};
+
+// ── SETTINGS ───────────────────────────────────────────────────────────────
+async function loadSettings() {
+  try {
+    const snap = await getDoc(doc(db,'settings','general'));
+    if (snap.exists()) {
+      const d = snap.data();
+      if(d.nameEn) document.getElementById('s-name-en').value = d.nameEn;
+      if(d.nameKu) document.getElementById('s-name-ku').value = d.nameKu;
+      if(d.tagEn) document.getElementById('s-tag-en').value = d.tagEn;
+      if(d.location) document.getElementById('s-location').value = d.location;
+      if(d.currency) document.getElementById('s-currency').value = d.currency;
+      if(d.lang) document.getElementById('s-lang').value = d.lang;
+    }
+  } catch(e) {}
+}
+
+window.saveSettings = async function() {
+  const data = {
+    nameEn: document.getElementById('s-name-en').value,
+    nameKu: document.getElementById('s-name-ku').value,
+    tagEn: document.getElementById('s-tag-en').value,
+    location: document.getElementById('s-location').value,
+    currency: document.getElementById('s-currency').value,
+    lang: document.getElementById('s-lang').value,
+  };
+  try {
+    await setDoc(doc(db,'settings','general'), data);
+    showToast('Settings saved!','✅');
+  } catch(e) { showToast('Error: '+e.message,'❌'); }
+};
+
+window.saveTypography = async function() {
+  const data = {
+    fsEn: document.getElementById('fs-en').value,
+    fsKu: document.getElementById('fs-ku').value,
+    fsAr: document.getElementById('fs-ar').value,
+    fsPrice: document.getElementById('fs-price').value,
+    fsDesc: document.getElementById('fs-desc').value,
+  };
+  try {
+    await setDoc(doc(db,'settings','typography'), data);
+    showToast('Typography saved!','✅');
+  } catch(e) { showToast('Error: '+e.message,'❌'); }
+};
+
+window.saveLayout = async function() {
+  const data = {
+    radius:     document.getElementById('sl-radius').value,
+    imgWidth:   document.getElementById('sl-imgw').value,
+    cardHeight: document.getElementById('sl-height').value,
+    cardGap:    document.getElementById('sl-gap').value,
+  };
+  try {
+    await setDoc(doc(db,'settings','layout'), data);
+    showToast('Layout saved! Refresh menu to see changes.','✅');
+  } catch(e) { showToast('Error: '+e.message,'❌'); }
+};
+
+// Live apply layout to preview
+function applyLayoutPreview() {
+  const radius     = document.getElementById('sl-radius').value;
+  const imgWidth   = document.getElementById('sl-imgw').value;
+  const cardHeight = document.getElementById('sl-height').value;
+  const p = document.getElementById('layout-preview');
+  if (!p) return;
+  p.style.borderRadius = radius + 'px';
+  p.style.minHeight    = cardHeight + 'px';
+  const pImg = p.querySelector('.preview-img');
+  if (pImg) { pImg.style.width = imgWidth+'px'; pImg.style.borderRadius = radius+'px 0 0 '+radius+'px'; }
+}
+
+// Hook sliders
+['sl-radius','sl-imgw','sl-height','sl-gap'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', applyLayoutPreview);
+});
+
+// changePassword removed
+
+// ── UI HELPERS ─────────────────────────────────────────────────────────────
+window.goPage = function(id, el) {
+  document.querySelectorAll('.page').forEach(p=>{
+    p.classList.remove('active');
+    p.style.display = '';
+  });
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
+  const target = document.getElementById('page-'+id);
+  if(target){ target.classList.add('active'); target.style.display='block'; }
+  if(el) el.classList.add('active');
+};
+
+window.closeModal = function(id) {
+  document.getElementById(id).classList.remove('open');
+};
+
+document.querySelectorAll('.modal-bg').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+});
+
+window.switchLangTab = function(lang, btn) {
+  ['en','ku','ar'].forEach(l => {
+    document.getElementById('ltab-'+l).style.display = l===lang?'block':'none';
+  });
+  document.querySelectorAll('.lang-tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+};
+
+window.syncColor = function(colorId, textId) {
+  const el = document.getElementById(textId);
+  if(el) el.value = document.getElementById(colorId).value;
+};
+window.syncText = function(textId, colorId) {
+  const val = document.getElementById(textId).value;
+  if(val.match(/^#[0-9a-fA-F]{3,8}$/)) {
+    const el = document.getElementById(colorId);
+    if(el) el.value = val;
+  }
+};
+
+// ══════════════════════════════════════════════════════
+// CARD LAYOUT BUILDER
+// ══════════════════════════════════════════════════════
+window.applyCardPreview = function() {
+  const imgPos    = document.getElementById('cb-img-pos').value;
+  const imgW      = document.getElementById('cb-img-w').value;
+  const imgH      = document.getElementById('cb-img-h').value;
+  const bg        = document.getElementById('cb-bg-t').value || document.getElementById('cb-bg').value;
+  const height    = document.getElementById('cb-height').value;
+  const radius    = document.getElementById('cb-radius').value;
+  const enC       = document.getElementById('cb-en-ct').value || document.getElementById('cb-en-c').value;
+  const enFs      = document.getElementById('cb-en-fs').value;
+  const enAlign   = document.getElementById('cb-en-align').value;
+  const enFw      = document.getElementById('cb-en-fw').value;
+  const enLs      = document.getElementById('cb-en-ls').value;
+  const enShow    = document.getElementById('cb-en-show').checked;
+  const kuC       = document.getElementById('cb-ku-ct').value || document.getElementById('cb-ku-c').value;
+  const kuFs      = document.getElementById('cb-ku-fs').value;
+  const kuShow    = document.getElementById('cb-ku-show').checked;
+  const arC       = document.getElementById('cb-ar-ct').value || document.getElementById('cb-ar-c').value;
+  const arFs      = document.getElementById('cb-ar-fs').value;
+  const arShow    = document.getElementById('cb-ar-show').checked;
+  const descC     = document.getElementById('cb-desc-ct').value;
+  const descFs    = document.getElementById('cb-desc-fs').value;
+  const descShow  = document.getElementById('cb-desc-show').checked;
+  const priceC    = document.getElementById('cb-price-ct').value || document.getElementById('cb-price-c').value;
+  const priceFs   = document.getElementById('cb-price-fs').value;
+  const pricePos  = document.getElementById('cb-price-pos').value;
+  const priceShow = document.getElementById('cb-price-show').checked;
+  const padV      = document.getElementById('cb-pad-v').value;
+  const padH      = document.getElementById('cb-pad-h').value;
+  const lineGap   = document.getElementById('cb-line-gap').value;
+
+  const card   = document.getElementById('cb-preview-card');
+  const imgL   = document.getElementById('cb-card-image-left');
+  const imgT   = document.getElementById('cb-card-image-top');
+  const body   = document.getElementById('cb-card-body');
+  const nameEl = document.getElementById('cb-card-name');
+  const kuEl   = document.getElementById('cb-card-ku');
+  const arEl   = document.getElementById('cb-card-ar');
+  const descEl = document.getElementById('cb-card-desc');
+  const priceEl= document.getElementById('cb-card-price');
+
+  // card shape
+  card.style.background  = bg;
+  card.style.minHeight   = height+'px';
+  card.style.borderRadius= radius+'px';
+  card.style.flexDirection = imgPos==='top' ? 'column' : 'row';
+
+  // image
+  if (imgPos==='left')   { imgL.style.display='flex';imgL.style.order=0;imgL.style.width=imgW+'px';card.style.flexDirection='row'; if(imgT)imgT.style.display='none'; }
+  else if (imgPos==='right') { imgL.style.display='flex';imgL.style.order=2;imgL.style.width=imgW+'px';card.style.flexDirection='row'; if(imgT)imgT.style.display='none'; }
+  else if (imgPos==='top')   { imgL.style.display='none';card.style.flexDirection='column'; }
+  else if (imgPos==='none')  { imgL.style.display='none'; }
+
+  // body padding + gap
+  body.style.padding = `${padV}px ${padH}px ${Math.max(parseInt(padV)+18,32)}px`;
+  body.style.gap = lineGap+'px';
+
+  // text align
+  body.style.textAlign = enAlign;
+
+  // EN name
+  nameEl.style.display      = enShow ? '' : 'none';
+  nameEl.style.color        = enC;
+  nameEl.style.fontSize     = enFs+'px';
+  nameEl.style.fontWeight   = enFw;
+  nameEl.style.letterSpacing= enLs+'px';
+  nameEl.style.textAlign    = enAlign;
+
+  // KU
+  kuEl.style.display  = kuShow ? '' : 'none';
+  kuEl.style.color    = kuC;
+  kuEl.style.fontSize = kuFs+'px';
+
+  // AR
+  arEl.style.display  = arShow ? '' : 'none';
+  arEl.style.color    = arC;
+  arEl.style.fontSize = arFs+'px';
+
+  // desc
+  descEl.style.display  = descShow ? '' : 'none';
+  descEl.style.color    = descC;
+  descEl.style.fontSize = descFs+'px';
+
+  // price positioning
+  priceEl.style.display = priceShow ? '' : 'none';
+  priceEl.style.color   = priceC;
+  priceEl.style.fontSize= priceFs+'px';
+  priceEl.style.position= 'absolute';
+  if (pricePos==='bottom-left')  { priceEl.style.bottom='10px'; priceEl.style.left=padH+'px'; priceEl.style.right=''; priceEl.style.top=''; }
+  if (pricePos==='bottom-right') { priceEl.style.bottom='10px'; priceEl.style.right=padH+'px'; priceEl.style.left=''; priceEl.style.top=''; }
+  if (pricePos==='top-right')    { priceEl.style.top='10px';    priceEl.style.right=padH+'px'; priceEl.style.left=''; priceEl.style.bottom=''; }
+  if (pricePos==='inline')       { priceEl.style.position='relative'; priceEl.style.bottom=''; priceEl.style.right=''; priceEl.style.left=''; priceEl.style.top=''; priceEl.style.marginTop='6px'; }
+};
+
+window.saveCardLayout = async function() {
+  const data = {
+    imgPos:    document.getElementById('cb-img-pos').value,
+    imgW:      document.getElementById('cb-img-w').value,
+    imgH:      document.getElementById('cb-img-h').value,
+    bg:        document.getElementById('cb-bg-t').value,
+    height:    document.getElementById('cb-height').value,
+    radius:    document.getElementById('cb-radius').value,
+    gap:       document.getElementById('cb-gap').value,
+    enC:       document.getElementById('cb-en-ct').value,
+    enFs:      document.getElementById('cb-en-fs').value,
+    enAlign:   document.getElementById('cb-en-align').value,
+    enFw:      document.getElementById('cb-en-fw').value,
+    enLs:      document.getElementById('cb-en-ls').value,
+    enShow:    document.getElementById('cb-en-show').checked,
+    kuC:       document.getElementById('cb-ku-ct').value,
+    kuFs:      document.getElementById('cb-ku-fs').value,
+    kuShow:    document.getElementById('cb-ku-show').checked,
+    arC:       document.getElementById('cb-ar-ct').value,
+    arFs:      document.getElementById('cb-ar-fs').value,
+    arShow:    document.getElementById('cb-ar-show').checked,
+    descC:     document.getElementById('cb-desc-ct').value,
+    descFs:    document.getElementById('cb-desc-fs').value,
+    descShow:  document.getElementById('cb-desc-show').checked,
+    priceC:    document.getElementById('cb-price-ct').value,
+    priceFs:   document.getElementById('cb-price-fs').value,
+    pricePos:  document.getElementById('cb-price-pos').value,
+    priceShow: document.getElementById('cb-price-show').checked,
+    padV:      document.getElementById('cb-pad-v').value,
+    padH:      document.getElementById('cb-pad-h').value,
+    lineGap:   document.getElementById('cb-line-gap').value,
+  };
+  try {
+    await setDoc(doc(db,'settings','cardLayout'), data);
+    showToast('Card layout saved! Refresh menu to see changes.','✅');
+  } catch(e) { showToast('Error: '+e.message,'❌'); }
+};
+
+// ══════════════════════════════════════════════════════
+// CATEGORY HEADER BUILDER
+// ══════════════════════════════════════════════════════
+let hbPos = { justify:'flex-end', align:'flex-start' };
+
+window.setHBPos = function(btn) {
+  document.querySelectorAll('#hb-pos-grid .pos-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const [j,a] = btn.dataset.pos.split(',');
+  hbPos = { justify:j, align:a };
+  applyHeaderPreview();
+};
+
+window.applyHeaderPreview = function() {
+  const ovC    = document.getElementById('hb-ov-c').value;
+  const ovOp   = parseInt(document.getElementById('hb-ov-op').value)/100;
+  const ovStyle= document.getElementById('hb-ov-style').value;
+  const imgH   = document.getElementById('hb-img-h').value;
+  const imgBr  = document.getElementById('hb-img-br').value;
+  const imgSat = document.getElementById('hb-img-sat').value;
+  const imgBlur= document.getElementById('hb-img-blur').value;
+  const imgPos = document.getElementById('hb-img-pos').value;
+  const pad    = document.getElementById('hb-pad').value;
+  const align  = document.getElementById('hb-text-align').value;
+  const enC    = document.getElementById('hb-en-ct').value || document.getElementById('hb-en-c').value;
+  const enFs   = document.getElementById('hb-en-fs').value;
+  const enLs   = document.getElementById('hb-en-ls').value;
+  const enShow = document.getElementById('hb-en-show').checked;
+  const kuC    = document.getElementById('hb-ku-ct').value || document.getElementById('hb-ku-c').value;
+  const kuFs   = document.getElementById('hb-ku-fs').value;
+  const kuShow = document.getElementById('hb-ku-show').checked;
+  const arC    = document.getElementById('hb-ar-ct').value || document.getElementById('hb-ar-c').value;
+  const arFs   = document.getElementById('hb-ar-fs').value;
+  const arShow = document.getElementById('hb-ar-show').checked;
+  const lineC  = document.getElementById('hb-line-c').value;
+  const lineW  = document.getElementById('hb-line-w').value;
+  const lineH  = document.getElementById('hb-line-h').value;
+  const lineShow=document.getElementById('hb-line-show').checked;
+
+  const preview  = document.getElementById('hb-preview');
+  const overlay  = document.getElementById('hb-preview-overlay');
+  const img      = document.getElementById('hb-preview-img');
+  const enEl     = document.getElementById('hb-preview-en');
+  const kuEl     = document.getElementById('hb-preview-ku');
+  const arEl     = document.getElementById('hb-preview-ar');
+  const lineEl   = document.getElementById('hb-preview-line');
+
+  // image
+  preview.style.height = imgH+'px';
+  img.style.filter     = `brightness(${imgBr}%) saturate(${imgSat}%) blur(${imgBlur}px)`;
+  img.style.objectPosition = imgPos;
+
+  // overlay color
+  function hexToRgb(h) { const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `${r},${g},${b}`; }
+  const rgb = hexToRgb(ovC.length===7?ovC:'#000000');
+  const bg = {
+    'solid':        `rgba(${rgb},${ovOp})`,
+    'top-fade':     `linear-gradient(to bottom, rgba(${rgb},${ovOp}) 0%, rgba(${rgb},${Math.max(0,ovOp-0.3)}) 100%)`,
+    'bottom-fade':  `linear-gradient(to top, rgba(${rgb},${ovOp}) 0%, rgba(${rgb},${Math.max(0,ovOp-0.3)}) 100%)`,
+    'left-fade':    `linear-gradient(to right, rgba(${rgb},${ovOp}) 0%, rgba(${rgb},0) 100%)`,
+    'vignette':     `radial-gradient(ellipse at center, rgba(${rgb},0) 30%, rgba(${rgb},${ovOp}) 100%)`,
+  }[ovStyle] || `rgba(${rgb},${ovOp})`;
+  overlay.style.background = bg;
+
+  // text position
+  overlay.style.justifyContent = hbPos.justify;
+  overlay.style.alignItems     = hbPos.align;
+  overlay.style.padding        = pad+'px';
+  overlay.style.textAlign      = align;
+
+  // titles
+  enEl.style.display      = enShow ? '' : 'none';
+  enEl.style.color        = enC;
+  enEl.style.fontSize     = enFs+'px';
+  enEl.style.letterSpacing= enLs+'px';
+  enEl.style.textAlign    = align;
+
+  kuEl.style.display   = kuShow ? '' : 'none';
+  kuEl.style.color     = kuC;
+  kuEl.style.fontSize  = kuFs+'px';
+  kuEl.style.textAlign = align;
+
+  arEl.style.display   = arShow ? '' : 'none';
+  arEl.style.color     = arC;
+  arEl.style.fontSize  = arFs+'px';
+  arEl.style.textAlign = align;
+
+  lineEl.style.display     = lineShow ? '' : 'none';
+  lineEl.style.background  = lineC;
+  lineEl.style.width       = lineW+'px';
+  lineEl.style.height      = lineH+'px';
+  if (align==='center') lineEl.style.margin = '4px auto 0';
+  else if (align==='right') lineEl.style.margin = '4px 0 0 auto';
+  else lineEl.style.margin = '4px 0 0 0';
+};
+
+window.hbLoadPreviewImage = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('hb-preview-img');
+    const fb  = document.getElementById('hb-preview-fallback');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    if(fb) fb.style.display='none';
+    applyHeaderPreview();
+  };
+  reader.readAsDataURL(file);
+};
+
+window.saveHeaderLayout = async function() {
+  const data = {
+    ovC:     document.getElementById('hb-ov-c').value,
+    ovOp:    document.getElementById('hb-ov-op').value,
+    ovStyle: document.getElementById('hb-ov-style').value,
+    imgH:    document.getElementById('hb-img-h').value,
+    imgBr:   document.getElementById('hb-img-br').value,
+    imgSat:  document.getElementById('hb-img-sat').value,
+    imgBlur: document.getElementById('hb-img-blur').value,
+    imgPos:  document.getElementById('hb-img-pos').value,
+    pad:     document.getElementById('hb-pad').value,
+    align:   document.getElementById('hb-text-align').value,
+    posJ:    hbPos.justify,
+    posA:    hbPos.align,
+    enC:     document.getElementById('hb-en-ct').value,
+    enFs:    document.getElementById('hb-en-fs').value,
+    enLs:    document.getElementById('hb-en-ls').value,
+    enShow:  document.getElementById('hb-en-show').checked,
+    kuC:     document.getElementById('hb-ku-ct').value,
+    kuFs:    document.getElementById('hb-ku-fs').value,
+    kuShow:  document.getElementById('hb-ku-show').checked,
+    arC:     document.getElementById('hb-ar-ct').value,
+    arFs:    document.getElementById('hb-ar-fs').value,
+    arShow:  document.getElementById('hb-ar-show').checked,
+    lineC:   document.getElementById('hb-line-c').value,
+    lineW:   document.getElementById('hb-line-w').value,
+    lineH:   document.getElementById('hb-line-h').value,
+    lineShow:document.getElementById('hb-line-show').checked,
+  };
+  try {
+    await setDoc(doc(db,'settings','headerLayout'), data);
+    showToast('Header layout saved! Refresh menu to see changes.','✅');
+  } catch(e) { showToast('Error: '+e.message,'❌'); }
+};
+
+window.saveBranding = async function() {
+  const data = {
+    name:        document.getElementById('b-name').value.trim(),
+    tagline:     document.getElementById('b-tagline').value.trim(),
+    logoUrl:     document.getElementById('b-logo-url').value.trim(),
+    nameColor:   document.getElementById('b-name-color-t').value,
+    navBg:       document.getElementById('b-nav-bg-t').value,
+    navText:     document.getElementById('b-nav-text-t').value,
+    lsBgUrl:     document.getElementById('b-ls-url').value.trim(),
+    lsBgBr:      document.getElementById('b-ls-br').value,
+    lsNameColor: document.getElementById('b-ls-name-ct').value,
+    lsTagColor:  document.getElementById('b-ls-tag-ct').value,
+    lsBtnColor:  document.getElementById('b-ls-btn-ct').value,
+    heroBgUrl:   document.getElementById('b-hero-url').value.trim(),
+    heroBgBr:    document.getElementById('b-hero-br').value,
+    heroEyeColor:document.getElementById('b-hero-eye-ct').value,
+    heroSubColor:document.getElementById('b-hero-sub-ct').value,
+    heroTitleColor:document.getElementById('b-hero-title-ct').value,
+    heroEyeText: document.getElementById('b-hero-eye').value.trim(),
+    heroSubText:  document.getElementById('b-hero-sub').value.trim(),
+    pageBg:      document.getElementById('b-page-bg-t').value,
+    gold:        document.getElementById('b-gold-t').value,
+  };
+  try {
+    await setDoc(doc(db,'settings','branding'), data);
+    showToast('Branding saved! Refresh menu to see changes.','✅');
+  } catch(e) { showToast('Error: '+e.message,'❌'); }
+};
+
+async function loadBranding() {
+  try {
+    const snap = await getDoc(doc(db,'settings','branding'));
+    if (!snap.exists()) return;
+    const d = snap.data();
+    const set = (id, val) => { const el = document.getElementById(id); if(el && val) el.value = val; };
+    set('b-name', d.name);
+    set('b-tagline', d.tagline);
+    set('b-logo-url', d.logoUrl);
+    set('b-name-color', d.nameColor); set('b-name-color-t', d.nameColor);
+    set('b-nav-bg', d.navBg); set('b-nav-bg-t', d.navBg);
+    set('b-nav-text', d.navText); set('b-nav-text-t', d.navText);
+    set('b-ls-url', d.lsBgUrl); set('b-ls-br', d.lsBgBr);
+    set('b-ls-name-c', d.lsNameColor); set('b-ls-name-ct', d.lsNameColor);
+    set('b-ls-tag-c', d.lsTagColor); set('b-ls-tag-ct', d.lsTagColor);
+    set('b-ls-btn-c', d.lsBtnColor); set('b-ls-btn-ct', d.lsBtnColor);
+    set('b-hero-url', d.heroBgUrl); set('b-hero-br', d.heroBgBr);
+    set('b-hero-eye-c', d.heroEyeColor); set('b-hero-eye-ct', d.heroEyeColor);
+    set('b-hero-sub-c', d.heroSubColor); set('b-hero-sub-ct', d.heroSubColor);
+    set('b-hero-title-c', d.heroTitleColor); set('b-hero-title-ct', d.heroTitleColor);
+    set('b-hero-eye', d.heroEyeText); set('b-hero-sub', d.heroSubText);
+    set('b-page-bg', d.pageBg); set('b-page-bg-t', d.pageBg);
+    set('b-gold', d.gold); set('b-gold-t', d.gold);
+    if(d.logoUrl) previewBrandingImg(d.logoUrl, 'b-logo-preview');
+    if(d.lsBgUrl) previewBrandingImg(d.lsBgUrl, 'b-ls-preview');
+    if(d.heroBgUrl) previewBrandingImg(d.heroBgUrl, 'b-hero-preview');
+    if(d.lsBgBr) document.getElementById('b-ls-br-v').textContent = d.lsBgBr+'%';
+    if(d.heroBgBr) document.getElementById('b-hero-br-v').textContent = d.heroBgBr+'%';
+  } catch(e) {}
+}
+
+
+// ═══════════════════════════════════════════════════
+// IMAGE SYSTEM — Base64 (no Firebase Storage needed)
+// ═══════════════════════════════════════════════════
+
+// Compress image file → base64 JPEG string
+function imageToBase64(file, maxPx, quality) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith('image/')) {
+      reject(new Error('Not an image file')); return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Cannot read file'));
+    reader.onload = evt => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Cannot decode image'));
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxPx || h > maxPx) {
+          if (w >= h) { h = Math.round(h * maxPx / w); w = maxPx; }
+          else        { w = Math.round(w * maxPx / h); h = maxPx; }
+        }
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL('image/jpeg', quality));
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// Show image in a preview box
+function showPreview(elId, base64) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = `<img src="${base64}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;display:block;">`;
+}
+
+// ── Upload for Menu Items ──────────────────────────
+window.handlePhotoUpload = async function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('upload-status');
+  const setS = (msg, ok) => {
+    if (!statusEl) return;
+    statusEl.style.display = 'block';
+    statusEl.style.color = ok === true ? 'var(--green)' : ok === false ? 'var(--red)' : 'var(--gold)';
+    statusEl.textContent = msg;
+  };
+  setS('⏳ Processing image...');
+  try {
+    const b64 = await imageToBase64(file, 900, 0.78);
+    document.getElementById('i-photo').value = b64;
+    showPreview('upload-preview', b64);
+    setS('✅ Image ready — click Save Item', true);
+    setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
+  } catch(e) {
+    setS('❌ ' + e.message, false);
+  }
+};
+
+// ── Upload for Branding Images ─────────────────────
+window.uploadBrandingImage = async function(input, previewId, urlInputId) {
+  const file = input.files[0];
+  if (!file) return;
+
+  // Status element — create inline if missing
+  const statusId = 'st-' + urlInputId;
+  let statusEl = document.getElementById(statusId);
+  if (!statusEl) {
+    statusEl = document.createElement('div');
+    statusEl.id = statusId;
+    statusEl.style.cssText = 'font-size:13px;padding:8px 12px;border-radius:6px;margin-top:8px;font-weight:500;display:none;';
+    const ref = document.getElementById(urlInputId);
+    if (ref && ref.parentNode) ref.parentNode.appendChild(statusEl);
+  }
+
+  const setS = (msg, ok) => {
+    statusEl.style.display = 'block';
+    statusEl.style.background = ok === true ? 'rgba(39,174,96,.12)' : ok === false ? 'rgba(231,76,60,.12)' : 'rgba(201,168,76,.08)';
+    statusEl.style.color = ok === true ? 'var(--green)' : ok === false ? 'var(--red)' : 'var(--gold)';
+    statusEl.textContent = msg;
+  };
+
+  setS('⏳ Processing image...');
+  try {
+    // Hero/LS screen gets higher res, logo gets smaller
+    const maxPx = urlInputId.includes('logo') ? 400 : 1400;
+    const b64 = await imageToBase64(file, maxPx, 0.80);
+    
+    // Put base64 into the hidden URL input
+    document.getElementById(urlInputId).value = b64;
+    
+    // Show preview
+    showPreview(previewId, b64);
+    
+    setS('✅ Image ready — click Save All Branding below', true);
+    setTimeout(() => { statusEl.style.display = 'none'; }, 5000);
+  } catch(e) {
+    setS('❌ Failed: ' + e.message, false);
+  }
+};
+
+// Preview from pasted URL (unchanged)
+window.previewBrandingImg = function(url, previewId) {
+  const el = document.getElementById(previewId);
+  if (!el || !url) return;
+  el.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.parentElement.innerHTML='<span style=padding:8px;opacity:.5;>Invalid image</span>'">`;
+};
+
+window.previewPhotoUrl = function(url) {
+  const el = document.getElementById('upload-preview');
+  if (!el || !url) return;
+  el.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.innerHTML='📷'">`;
+};
+
+window.showToast = function(msg, icon='✅') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').textContent = icon;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+};
+</script>
+</body>
+</html>
