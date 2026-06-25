@@ -53,6 +53,7 @@ body{background:var(--bg);color:var(--w);font-family:var(--fen);overflow-x:hidde
 #ls{position:fixed;inset:0;z-index:9999;background:#050505;display:none;align-items:center;justify-content:center;}
 .ls-bg{position:absolute;inset:0;overflow:hidden;}
 .ls-box{position:relative;z-index:2;text-align:center;padding:40px 24px;animation:fUp .8s ease;}
+.ls-logo-main{display:none;max-width:78%;max-height:24vh;width:auto;height:auto;object-fit:contain;margin:0 auto 16px;}
 .ls-name{font-family:var(--fd);font-size:clamp(44px,10vw,88px);font-weight:600;letter-spacing:.35em;color:var(--ls-name-color);text-shadow:0 0 80px rgba(201,168,76,.4);margin-bottom:8px;}
 .ls-tag{font-style:italic;font-size:15px;letter-spacing:.4em;color:var(--ls-tag-color);margin-bottom:52px;}
 .ls-rule{width:140px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 40px;}
@@ -199,6 +200,7 @@ footer{text-align:center;padding:52px 28px;border-top:1px solid rgba(0,0,0,0.1);
 <div id="ls">
   <div class="ls-bg" id="ls-bg"><img id="ls-bg-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></div>
   <div class="ls-box">
+    <img class="ls-logo-main" id="ls-logo-main" src="" alt="">
     <div class="ls-name" id="ls-name">XANEDAN</div>
     <div class="ls-rule"></div>
     <div class="ls-btns">
@@ -336,7 +338,12 @@ async function preloadCover() {
     const bd = window._brandingData || {};
     const bgUrl = d.bgUrl || bd.lsBgUrl || bd.heroBgUrl;
     if (bgUrl) setImage('cv-bg-img', bgUrl, d.bgUrl ? (d.bgBr || 55) : 55, 1);
-    if (d.logoUrl) { const e = document.getElementById('cv-logo-main'); if (e) { e.src = d.logoUrl; e.style.display = 'block'; } }
+    if (d.logoUrl) {
+      const e = document.getElementById('cv-logo-main'); if (e) { e.src = d.logoUrl; e.style.display = 'block'; }
+      const le = document.getElementById('ls-logo-main'); if (le) { le.src = d.logoUrl; le.style.display = 'block'; }
+      const nameEl = document.getElementById('ls-name'); if (nameEl) nameEl.style.display = 'none';
+      const tagEl = document.getElementById('ls-tag'); if (tagEl) tagEl.style.display = 'none';
+    }
     if (d.menuBtnOpacity != null) document.documentElement.style.setProperty('--cv-menu-op', d.menuBtnOpacity / 100);
     const setTxt = (id, val) => { if (!val) return; const e = document.getElementById(id); if (e) e.textContent = val; };
     setTxt('cv-loc-label', d.locLabel);
