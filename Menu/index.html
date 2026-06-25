@@ -26,7 +26,31 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--w);font-family:var(--fen);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
-#ls{position:fixed;inset:0;z-index:9999;background:#050505;display:flex;align-items:center;justify-content:center;}
+/* COVER / WELCOME SCREEN */
+#cover{position:fixed;inset:0;z-index:10000;overflow:hidden;background:#0a0a0a;}
+.cv-bg{position:absolute;inset:0;}
+.cv-bg img{width:100%;height:100%;object-fit:cover;object-position:center 30%;}
+.cv-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,5,5,.6) 0%,rgba(5,5,5,.1) 28%,rgba(5,5,5,.05) 52%,rgba(5,5,5,.78) 100%);}
+.cv-top{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;padding-top:9vh;text-align:center;}
+.cv-logo-main{max-width:72%;max-height:22vh;width:auto;height:auto;object-fit:contain;display:none;}
+.cv-menu-btn{position:relative;z-index:2;display:block;margin:7vh auto 0;border:2px solid #000;background:rgba(255,255,255,var(--cv-menu-op,.85));backdrop-filter:blur(4px);color:#000;font-family:var(--fd);font-size:22px;letter-spacing:.3em;padding:16px 62px;cursor:pointer;transition:all .25s;}
+.cv-menu-btn:hover{background:rgba(255,255,255,1);}
+.cv-links{position:relative;z-index:2;display:flex;justify-content:center;gap:60px;margin-top:9vh;flex-wrap:wrap;}
+.cv-link-group{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.cv-icons{display:flex;gap:10px;min-height:38px;}
+.cv-icon{width:38px;height:38px;border-radius:50%;border:1.3px solid rgba(255,255,255,.8);display:flex;align-items:center;justify-content:center;color:#fff;transition:all .2s;}
+.cv-icon:hover{border-color:var(--gold);background:rgba(201,168,76,.15);}
+.cv-label{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.85);}
+.cv-footer{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;justify-content:space-between;align-items:flex-end;padding:0 32px 30px;}
+.cv-location,.cv-since{display:flex;flex-direction:column;gap:2px;}
+.cv-since{text-align:right;align-items:flex-end;}
+.cv-foot-label{font-family:var(--fd);font-size:11px;letter-spacing:.2em;color:rgba(255,255,255,.95);display:flex;align-items:center;gap:4px;text-transform:uppercase;}
+.cv-foot-text{font-size:11px;letter-spacing:.15em;color:rgba(255,255,255,.7);text-transform:uppercase;}
+@media(max-width:480px){
+  .cv-menu-btn{padding:14px 44px;font-size:18px;}
+  .cv-links{gap:34px;}
+}
+#ls{position:fixed;inset:0;z-index:9999;background:#050505;display:none;align-items:center;justify-content:center;}
 .ls-bg{position:absolute;inset:0;overflow:hidden;}
 .ls-box{position:relative;z-index:2;text-align:center;padding:40px 24px;animation:fUp .8s ease;}
 .ls-name{font-family:var(--fd);font-size:clamp(44px,10vw,88px);font-weight:600;letter-spacing:.35em;color:var(--ls-name-color);text-shadow:0 0 80px rgba(201,168,76,.4);margin-bottom:8px;}
@@ -141,14 +165,44 @@ footer{text-align:center;padding:52px 28px;border-top:1px solid rgba(0,0,0,0.1);
 </head>
 <body>
 
+<!-- COVER / WELCOME SCREEN -->
+<div id="cover">
+  <div class="cv-bg"><img id="cv-bg-img" src="" alt="" style="display:none;"></div>
+  <div class="cv-overlay"></div>
+  <div class="cv-top">
+    <img class="cv-logo-main" id="cv-logo-main" src="" alt="">
+  </div>
+  <button class="cv-menu-btn" onclick="openLang()">MENU</button>
+  <div class="cv-links">
+    <div class="cv-link-group">
+      <div class="cv-icons" id="cv-contact-icons"></div>
+      <div class="cv-label">Contact</div>
+    </div>
+    <div class="cv-link-group">
+      <div class="cv-icons" id="cv-social-icons"></div>
+      <div class="cv-label">Social Media</div>
+    </div>
+  </div>
+  <div class="cv-footer">
+    <div class="cv-location">
+      <span class="cv-foot-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><span id="cv-loc-label">Location</span></span>
+      <span class="cv-foot-text" id="cv-loc-text">Akre Kurdistan</span>
+    </div>
+    <div class="cv-since">
+      <span class="cv-foot-label" id="cv-since-label">Here</span>
+      <span class="cv-foot-text" id="cv-since-text">Since 2021</span>
+    </div>
+  </div>
+</div>
+
 <!-- LANG SCREEN -->
 <div id="ls">
   <div class="ls-bg" id="ls-bg"><img id="ls-bg-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></div>
   <div class="ls-box">
     <div class="ls-name" id="ls-name">XANEDAN</div>
-    <div class="ls-tag"></div>
+    <div class="ls-tag">Cafe &amp; Rest · Akre · Kurdistan</div>
     <div class="ls-rule"></div>
-    <div class="ls-hint"></div>
+    <div class="ls-hint">Choose your language / زمانێ خو هەلبژێرە / اختر لغتك</div>
     <div class="ls-btns">
       <button class="ls-btn" onclick="launch('en')"><span class="bl">EN</span><span class="bn">English</span></button>
       <button class="ls-btn" onclick="launch('ku')"><span class="bl">KU</span><span class="bn">کوردی</span></button>
@@ -250,7 +304,56 @@ async function preloadBranding() {
     console.warn('[Branding]', e.message);
   }
 }
-preloadBranding();
+
+// ── Preload cover/welcome screen (runs immediately, before user clicks anything) ──
+const COVER_ICONS = {
+  whatsapp:  '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.5 2.3.8 3.6.8.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3c.6 0 1 .4 1 1 0 1.3.3 2.5.8 3.6.1.3.1.7-.2 1L6.6 10.8z"/></svg>',
+  instagram: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="0.9" fill="currentColor" stroke="none"/></svg>',
+  facebook:  '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.84c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.78-1.63 1.58v1.89h2.78l-.44 2.91h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94z"/></svg>',
+  tiktok:    '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.4 2.2 1.9 3.8 4 4.2v2.6c-1.5 0-2.9-.4-4-1.2v6.6a5.6 5.6 0 1 1-5.6-5.6c.3 0 .6 0 .9.1v2.7a2.9 2.9 0 1 0 2 2.8V3h2.7z"/></svg>',
+  snapchat:  '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c3 0 5 2.2 5 5.4 0 1 0 2 .2 2.6.6.2 1.4.1 1.9-.2.3-.2.7-.1.8.2.1.3 0 .6-.3.8-.5.4-1.3.8-1.8 1 .1.4.5 1.1 1.6 1.6.3.1.4.5.2.8-.5.8-1.7 1-2.5 1.1-.1.3-.3.8-.6 1.1-.7.7-1.7.9-2.6.9h-3.8c-.9 0-1.9-.2-2.6-.9-.3-.3-.5-.8-.6-1.1-.8-.1-2-.3-2.5-1.1-.2-.3-.1-.7.2-.8 1.1-.5 1.5-1.2 1.6-1.6-.5-.2-1.3-.6-1.8-1-.3-.2-.4-.5-.3-.8.1-.3.5-.4.8-.2.5.3 1.3.4 1.9.2.2-.6.2-1.6.2-2.6C7 4.2 9 2 12 2z"/></svg>',
+  telegram:  '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 3.5 2.7 11c-.7.3-.7 1.3.1 1.5l4.4 1.4 1.7 5.4c.2.7 1.1.8 1.5.2l2.4-3 4.5 3.4c.6.4 1.4.1 1.6-.6l3.1-14.4c.2-.8-.6-1.5-1.5-1.4zM9 14.5l-1-3.2 9-5.8-7.5 6.7z"/></svg>',
+  youtube:   '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M10.3 9.5v5l4.2-2.5z" fill="currentColor" stroke="none"/></svg>',
+  x:         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l16 16M20 4 4 20"/></svg>',
+  link:      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 14.3 0 18M12 3c-2.5 2.7-2.5 14.3 0 18"/></svg>',
+};
+function buildCoverIcons(containerId, items) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.innerHTML = '';
+  (items || []).forEach(it => {
+    if (!it || !it.value) return;
+    const href = it.type === 'whatsapp' ? `https://wa.me/${String(it.value).replace(/[^0-9]/g,'')}` : it.value;
+    const a = document.createElement('a');
+    a.className = 'cv-icon';
+    a.href = href; a.target = '_blank'; a.rel = 'noopener';
+    a.innerHTML = COVER_ICONS[it.type] || COVER_ICONS.link;
+    c.appendChild(a);
+  });
+}
+async function preloadCover() {
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'cover'));
+    const d = snap.exists() ? snap.data() : {};
+    const bd = window._brandingData || {};
+    const bgUrl = d.bgUrl || bd.lsBgUrl || bd.heroBgUrl;
+    if (bgUrl) setImage('cv-bg-img', bgUrl, d.bgUrl ? (d.bgBr || 55) : 55, 1);
+    if (d.logoUrl) { const e = document.getElementById('cv-logo-main'); if (e) { e.src = d.logoUrl; e.style.display = 'block'; } }
+    if (d.menuBtnOpacity != null) document.documentElement.style.setProperty('--cv-menu-op', d.menuBtnOpacity / 100);
+    const setTxt = (id, val) => { if (!val) return; const e = document.getElementById(id); if (e) e.textContent = val; };
+    setTxt('cv-loc-label', d.locLabel);
+    setTxt('cv-loc-text', d.locText);
+    setTxt('cv-since-label', d.sinceLabel);
+    setTxt('cv-since-text', d.sinceText);
+    const contacts = (d.contacts || []).map(v => ({ type: 'whatsapp', value: v }));
+    const socials = (d.socials || []).map(s => typeof s === 'string' ? { type: 'link', value: s } : { type: s.type || 'link', value: s.url });
+    buildCoverIcons('cv-contact-icons', contacts);
+    buildCoverIcons('cv-social-icons', socials);
+  } catch (e) {
+    console.warn('[Cover]', e.message);
+  }
+}
+(async () => { await preloadBranding(); preloadCover(); })();
 
 // ── Apply all Firebase settings to CSS vars ─────────────────────────
 async function applyFirebaseSettings() {
@@ -455,6 +558,12 @@ window.showSection = function(id, btn) {
   document.getElementById('s-' + id)?.classList.add('active');
   btn?.classList.add('active');
   document.querySelector('.nav-wrap')?.scrollIntoView({ behavior:'smooth', block:'nearest' });
+};
+
+// ── Cover screen → language screen ──────────────────────────────────
+window.openLang = function() {
+  document.getElementById('cover').style.display = 'none';
+  document.getElementById('ls').style.display = 'flex';
 };
 
 // ── Language selection ──────────────────────────────────────────────
